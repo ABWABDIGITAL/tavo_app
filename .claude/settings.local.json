@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "Bash(flutter pub get:*)",
+      "Bash(del \"E:\\\\tavo\\\\lib\\\\core\\\\widgets\\\\splash_screen.dart\")",
+      "Bash(flutter clean:*)",
+      "Bash(flutter run:*)",
+      "Bash(flutter analyze:*)"
+    ]
+  }
+}

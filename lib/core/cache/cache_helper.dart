@@ -1,0 +1,74 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
+class CacheHelper {
+  CacheHelper._();
+
+  static SharedPreferences? _prefs;
+
+  static const String _tokenKey = 'token';
+  static const String _userKey = 'user';
+  static const String _phoneKey = 'phone';
+  static const String _countryCodeKey = 'country_code';
+  static const String _onboardingKey = 'onboarding_completed';
+
+  static Future<void> init() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
+  static Future<bool> setToken(String token) async {
+    return await _prefs?.setString(_tokenKey, token) ?? false;
+  }
+
+  static String? getToken() {
+    return _prefs?.getString(_tokenKey);
+  }
+
+  static Future<bool> setPhone(String phone) async {
+    return await _prefs?.setString(_phoneKey, phone) ?? false;
+  }
+
+  static String? getPhone() {
+    return _prefs?.getString(_phoneKey);
+  }
+
+  static Future<bool> setCountryCode(String code) async {
+    return await _prefs?.setString(_countryCodeKey, code) ?? false;
+  }
+
+  static String? getCountryCode() {
+    return _prefs?.getString(_countryCodeKey);
+  }
+
+  static Future<bool> setUser(String userJson) async {
+    return await _prefs?.setString(_userKey, userJson) ?? false;
+  }
+
+  static String? getUser() {
+    return _prefs?.getString(_userKey);
+  }
+
+  static Future<bool> setOnboardingCompleted(bool value) async {
+    return await _prefs?.setBool(_onboardingKey, value) ?? false;
+  }
+
+  static bool isOnboardingCompleted() {
+    return _prefs?.getBool(_onboardingKey) ?? false;
+  }
+
+  static Future<bool> clearAll() async {
+    return await _prefs?.clear() ?? false;
+  }
+
+  static Future<bool> clearUserData() async {
+    await _prefs?.remove(_tokenKey);
+    await _prefs?.remove(_userKey);
+    await _prefs?.remove(_phoneKey);
+    await _prefs?.remove(_countryCodeKey);
+    return true;
+  }
+
+  static bool isLoggedIn() {
+    final token = getToken();
+    return token != null && token.isNotEmpty;
+  }
+}
