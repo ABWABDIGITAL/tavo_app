@@ -1,64 +1,36 @@
 // lib/feature/booking/ui/screens/bookings_screen.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tavo/core/di/service_locator.dart';
+import 'package:tavo/core/localization/locale_keys.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/feature/booking/data/model/booking_model.dart';
 import 'package:tavo/feature/booking/data/model/booking_status.dart';
+import 'package:tavo/feature/booking/ui/logic/bookings_cubit.dart';
+import 'package:tavo/feature/booking/ui/logic/bookings_state.dart';
 import 'package:tavo/feature/booking/ui/widgets/booking_card.dart';
+import 'package:tavo/feature/booking/ui/widgets/order_details_loading_sheet.dart';
+import 'package:tavo/feature/booking/ui/widgets/order_details_sheet.dart';
+import 'package:tavo/feature/profile/ui/widgets/profile_widgets.dart';
 
 class BookingsScreen extends StatefulWidget {
-  const BookingsScreen({super.key});
+  final bool showAppBar;
+
+  const BookingsScreen({
+    super.key,
+    this.showAppBar = true,
+  });
 
   @override
   State<BookingsScreen> createState() => _BookingsScreenState();
 }
 
-class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProviderStateMixin {
+class _BookingsScreenState extends State<BookingsScreen>
+    with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-
-  final List<BookingModel> _bookings = const [
-    BookingModel(
-      id: '#128350',
-      restaurantName: 'مطعم البيك',
-      restaurantLogoUrl: 'https://picsum.photos/200/200?random=1',
-      total: 360,
-      address: 'طريق عرفات، بدر، الرياض',
-      dateTimeText: '1 مارس 2026 - 3:00 م',
-      seatsText: '3 كراسي محجوزة',
-      status: BookingStatus.cancelled,
-    ),
-    BookingModel(
-      id: '#128351',
-      restaurantName: 'مطعم البيك',
-      restaurantLogoUrl: 'https://picsum.photos/200/200?random=2',
-      total: 360,
-      address: 'طريق عرفات، بدر، الرياض',
-      dateTimeText: '1 مارس 2026 - 3:00 م',
-      seatsText: '3 كراسي محجوزة',
-      status: BookingStatus.completed,
-    ),
-    BookingModel(
-      id: '#128352',
-      restaurantName: 'مطعم البيك',
-      restaurantLogoUrl: 'https://picsum.photos/200/200?random=3',
-      total: 360,
-      address: 'طريق عرفات، بدر، الرياض',
-      dateTimeText: '1 مارس 2026 - 3:00 م',
-      seatsText: '3 كراسي محجوزة',
-      status: BookingStatus.inProgress,
-    ),
-    BookingModel(
-      id: '#128353',
-      restaurantName: 'مطعم البيك',
-      restaurantLogoUrl: 'https://picsum.photos/200/200?random=4',
-      total: 360,
-      address: 'طريق عرفات، بدر، الرياض',
-      dateTimeText: '1 مارس 2026 - 3:00 م',
-      seatsText: '3 كراسي محجوزة',
-      status: BookingStatus.inProgress,
-    ),
-  ];
 
   @override
   void initState() {
@@ -72,25 +44,170 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  List<BookingModel> _filter(BookingStatus status) =>
-      _bookings.where((e) => e.status == status).toList();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
+    return BlocProvider(
+      create: (_) => getIt<BookingsCubit>()..loadBookings(),
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              if (widget.showAppBar) ...[
+                SizedBox(height: 10.h),
+                AnimatedAppBar(title: LocaleKeys.bookings.tr()),
+                SizedBox(height: 16.h),
+              ],
+              _buildTabs(context),
+              SizedBox(height: 14.h),
+              Expanded(
+                child: BlocConsumer<BookingsCubit, BookingsState>(
+                  listener: (context, state) {
+                    if (state.orderDetails != null) {
+                      Navigator.of(context).pop();
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => OrderDetailsSheet(order: state.orderDetails!),
+                      );
+                      context.read<BookingsCubit>().clearDetails();
+                    }
+
+                    if (state.detailsError != null) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.detailsError!),
+                          backgroundColor: const Color(0xFFC62828),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          margin: EdgeInsets.all(16.w),
+                        ),
+                      );
+                      context.read<BookingsCubit>().clearDetails();
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state.loading) {
+                      return const Center(
+                        child: CircularProgressIndicator(color: ColorsManager.primaryColor),
+                      );
+                    }
+
+                    if (state.error != null) {
+                      return _buildErrorWidget(context, state.error!);
+                    }
+
+                    final locale = context.locale.languageCode;
+
+                    return TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _BookingsList(
+                          items: state.filterBy(BookingStatus.inProgress),
+                          locale: locale,
+                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onDetails: (id) => _onViewDetails(context, id),
+                        ),
+                        _BookingsList(
+                          items: state.filterBy(BookingStatus.completed),
+                          locale: locale,
+                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onDetails: (id) => _onViewDetails(context, id),
+                        ),
+                        _BookingsList(
+                          items: state.filterBy(BookingStatus.cancelled),
+                          locale: locale,
+                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onDetails: (id) => _onViewDetails(context, id),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onViewDetails(BuildContext context, String orderId) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const OrderDetailsLoadingSheet(),
+    );
+    context.read<BookingsCubit>().loadOrderDetails(orderId);
+  }
+
+  Widget _buildTabs(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Container(
+        height: 40.h,
+        padding: EdgeInsets.all(3.r),
+        decoration: BoxDecoration(
+          color: ColorsManager.grey100,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: TabBar(
+          controller: _tabController,
+          dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.tab,
+          labelColor: ColorsManager.black,
+          unselectedLabelColor: ColorsManager.darkGray300,
+          labelStyle: TextStyles.font12DarkGray400Weight(context).copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle:
+              TextStyles.font12DarkGray400Weight(context).copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+          labelPadding: EdgeInsets.zero,
+          indicator: BoxDecoration(
+            color: ColorsManager.white,
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          tabs: [
+            Tab(text: LocaleKeys.inProgress.tr()),
+            Tab(text: LocaleKeys.completed.tr()),
+            Tab(text: LocaleKeys.cancelled.tr()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(BuildContext context, String error) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(20.w),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildHeaderWithTabs(context),
-            SizedBox(height: 14.h),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _BookingsList(items: _filter(BookingStatus.inProgress)),
-                  _BookingsList(items: _filter(BookingStatus.completed)),
-                  _BookingsList(items: _filter(BookingStatus.cancelled)),
-                ],
+            Icon(Icons.error_outline, size: 48.r, color: ColorsManager.darkGray300),
+            SizedBox(height: 12.h),
+            Text(
+              error,
+              textAlign: TextAlign.center,
+              style: TextStyles.font14DarkGray400Weight(context),
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(
+              onPressed: () => context.read<BookingsCubit>().loadBookings(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorsManager.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                'retry'.tr(),
+                style: const TextStyle(color: ColorsManager.white),
               ),
             ),
           ],
@@ -98,69 +215,20 @@ class _BookingsScreenState extends State<BookingsScreen> with SingleTickerProvid
       ),
     );
   }
-
-  Widget _buildHeaderWithTabs(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-      child: Row(
-        children: [
-          Text(
-            'الحجوزات',
-            style: TextStyles.font18Black400Weight(context).copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Container(
-              height: 40.h,
-              padding: EdgeInsets.all(3.r),
-              decoration: BoxDecoration(
-                color: ColorsManager.grey100,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                labelColor: ColorsManager.black,
-                unselectedLabelColor: ColorsManager.darkGray300,
-                labelStyle: TextStyles.font12DarkGray400Weight(context).copyWith(
-                 
-                ),
-                unselectedLabelStyle: TextStyles.font12DarkGray400Weight(context).copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-                labelPadding: EdgeInsets.zero,
-                indicator: BoxDecoration(
-                  color: ColorsManager.white,
-                  borderRadius: BorderRadius.circular(10.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: ColorsManager.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                tabs: const [
-                  Tab(text: 'قيد التنفيذ'),
-                  Tab(text: 'مكتملة'),
-                  Tab(text: 'ملغية'),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _BookingsList extends StatelessWidget {
   final List<BookingModel> items;
+  final String locale;
+  final Future<void> Function() onRefresh;
+  final void Function(String orderId) onDetails;
 
-  const _BookingsList({required this.items});
+  const _BookingsList({
+    required this.items,
+    required this.locale,
+    required this.onRefresh,
+    required this.onDetails,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +244,7 @@ class _BookingsList extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'لا توجد حجوزات',
+              LocaleKeys.noBookings.tr(),
               style: TextStyles.font14DarkGray400Weight(context).copyWith(
                 fontWeight: FontWeight.w600,
                 color: ColorsManager.darkGray300,
@@ -187,27 +255,34 @@ class _BookingsList extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => SizedBox(height: 12.h),
-      itemBuilder: (_, i) {
-        final b = items[i];
-        return BookingCard(
-          bookingId: b.id,
-          restaurantName: b.restaurantName,
-          logoUrl: b.restaurantLogoUrl,
-          total: b.total,
-          address: b.address,
-          dateTimeText: b.dateTimeText,
-          seatsText: b.seatsText,
-          status: b.status,
-          onDetails: () {},
-          onDelete: () {},
-          onRate: () {},
-          onCancel: () {},
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      color: ColorsManager.primaryColor,
+      child: ListView.separated(
+        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        itemCount: items.length,
+        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        itemBuilder: (_, i) {
+          final b = items[i];
+          return BookingCard(
+            bookingId: b.orderNumber.isNotEmpty ? b.orderNumber : b.id,
+            restaurantName: b.getName(locale),
+            logoUrl: b.restaurantLogoUrl,
+            total: b.total,
+            address: b.address,
+            dateTimeText: b.dateTimeText,
+            seatsText: b.seatsText,
+            status: b.status,
+            onDetails: () => onDetails(b.id),
+            onDelete: () {},
+            onRate: () {},
+            onCancel: () {},
+          );
+        },
+      ),
     );
   }
 }

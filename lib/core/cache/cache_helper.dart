@@ -10,6 +10,9 @@ class CacheHelper {
   static const String _phoneKey = 'phone';
   static const String _countryCodeKey = 'country_code';
   static const String _onboardingKey = 'onboarding_completed';
+  static const String _userIdKey = 'user_id';
+  static const String _userNameKey = 'user_name';
+  static const String _userImageKey = 'user_image';
 
   static Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -21,6 +24,30 @@ class CacheHelper {
 
   static String? getToken() {
     return _prefs?.getString(_tokenKey);
+  }
+
+  static Future<bool> setUserId(String id) async {
+    return await _prefs?.setString(_userIdKey, id) ?? false;
+  }
+
+  static String? getUserId() {
+    return _prefs?.getString(_userIdKey);
+  }
+
+  static Future<bool> setUserName(String name) async {
+    return await _prefs?.setString(_userNameKey, name) ?? false;
+  }
+
+  static String? getUserName() {
+    return _prefs?.getString(_userNameKey);
+  }
+
+  static Future<bool> setUserImage(String url) async {
+    return await _prefs?.setString(_userImageKey, url) ?? false;
+  }
+
+  static String? getUserImage() {
+    return _prefs?.getString(_userImageKey);
   }
 
   static Future<bool> setPhone(String phone) async {
@@ -64,6 +91,9 @@ class CacheHelper {
     await _prefs?.remove(_userKey);
     await _prefs?.remove(_phoneKey);
     await _prefs?.remove(_countryCodeKey);
+    await _prefs?.remove(_userIdKey);
+    await _prefs?.remove(_userNameKey);
+    await _prefs?.remove(_userImageKey);
     return true;
   }
 

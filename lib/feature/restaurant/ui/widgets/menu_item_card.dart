@@ -1,3 +1,4 @@
+// lib/feature/restaurant/ui/widgets/menu_item_card.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -9,14 +10,13 @@ import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/core/theme/theme_extensions.dart';
 import 'package:tavo/feature/restaurant/data/model/menu_item_model.dart';
 
-
 class MenuItemCard extends StatelessWidget {
   final MenuItemModel item;
   final String locale;
   final int qty;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
-  final VoidCallback? onCustomize;
+  final VoidCallback? onCustomize; // ✅ Only for customize button
 
   const MenuItemCard({
     super.key,
@@ -40,6 +40,7 @@ class MenuItemCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
+          // Image
           Positioned.fill(
             child: CachedNetworkImage(
               imageUrl: item.imageUrl,
@@ -55,12 +56,16 @@ class MenuItemCard extends StatelessWidget {
               ),
             ),
           ),
+
+          // Overlay
           Positioned.fill(
             child: Container(
-              color: ColorsManager.black.withValues(alpha: 0.18),
+              color: ColorsManager.black.withOpacity(0.18),
             ),
           ),
-          if (item.hasDiscount)
+
+          // ✅ Customize Button - ONLY this opens customization screen
+          if (item.hasDiscount || onCustomize != null)
             PositionedDirectional(
               top: 10.h,
               end: 10.w,
@@ -96,13 +101,15 @@ class MenuItemCard extends StatelessWidget {
                 ),
               ),
             ),
+
+          // ✅ Bottom Info - +/- adds directly without customization
           PositionedDirectional(
             bottom: 0,
             start: 0,
             end: 0,
             child: Container(
               padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
-              color: ColorsManager.black.withValues(alpha: 0.35),
+              color: ColorsManager.black.withOpacity(0.35),
               child: Row(
                 children: [
                   Expanded(
@@ -148,22 +155,15 @@ class MenuItemCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 8.w),
+                  // ✅ +/- buttons add/remove directly (no customization)
                   if (qty > 0) ...[
                     GestureDetector(
                       onTap: onRemove,
-                      child: Container(
+                      child: SvgPicture.asset(
+                        AppAssets.minus,
                         width: 28.r,
                         height: 28.r,
-                        decoration: BoxDecoration(
-                          color: ColorsManager.white,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.remove,
-                          size: 18.r,
-                          color: ColorsManager.primaryColor,
-                        ),
+                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                       ),
                     ),
                     SizedBox(width: 8.w),
@@ -176,7 +176,7 @@ class MenuItemCard extends StatelessWidget {
                     SizedBox(width: 8.w),
                   ],
                   GestureDetector(
-                    onTap: onAdd,
+                    onTap: onAdd, // ✅ Direct add without customization
                     child: SvgPicture.asset(
                       AppAssets.plus,
                       width: 28.r,

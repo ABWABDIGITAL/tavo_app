@@ -53,7 +53,33 @@ class AppAssets {
   static const String bookings = 'assets/icons/calendar.svg';
   static const String logout = 'assets/icons/logout.svg';
   static const String saFlag = 'assets/icons/sa_flag.svg';
+  static const String about = 'assets/icons/about.svg';
+  static const String language = 'assets/icons/language.svg';
+  static const String settings = 'assets/icons/settings.svg';
+  static const String help = 'assets/icons/help.svg';
+  static const String info = 'assets/icons/info.svg';
+  static const String delete = 'assets/icons/delete.svg';
+  static const String trash = 'assets/icons/trash.svg';
+  static const String heart = 'assets/icons/heart.svg';
+  static const String heartFill = 'assets/icons/heart_fill.svg';
+  static const String heartOutline = 'assets/icons/heart_outline.svg';
+  static const String document = 'assets/icons/document.svg';
+  static const String shield = 'assets/icons/shield.svg';
+  static const String contact = 'assets/icons/contact.svg';
+  static const String headphone = 'assets/icons/headphone.svg';
+  static const String bell = 'assets/icons/bell.svg';
+static const String messageQuestion='assets/icons/message-question.svg';
 
+static const String arrowLeft = 'assets/icons/arrow-left.svg';
+
+static const String checkCircle = 'assets/icons/check-circle.svg';
+static const String orderSuccess = 'assets/icons/order_success.svg';
+static const String receipt = 'assets/icons/receipt.svg';
+
+ 
+
+  
+  
   
   
 }

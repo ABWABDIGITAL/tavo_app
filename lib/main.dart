@@ -1,7 +1,9 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tavo/core/di/service_locator.dart';
 import 'package:tavo/core/theme/app_theme.dart';
 import 'package:tavo/feature/splash/ui/screens/splash_screen.dart';
@@ -41,7 +43,13 @@ class TavoApp extends StatelessWidget {
           title: 'Tavo',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.theme,
-          localizationsDelegates: context.localizationDelegates,
+          // These delegates handle RTL automatically
+          localizationsDelegates: [
+            ...context.localizationDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           supportedLocales: context.supportedLocales,
           locale: context.locale,
           home: const SplashScreen(),

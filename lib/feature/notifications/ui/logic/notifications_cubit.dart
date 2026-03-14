@@ -1,74 +1,63 @@
-// lib/ui/cubit/notifications_cubit.dart
+// lib/feature/notifications/ui/logic/notifications_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../data/model/app_notification.dart';
-import 'notifications_state.dart';
+import 'package:tavo/core/network/api_exception.dart';
+import 'package:tavo/feature/notifications/data/repo/notifications_repo.dart';
+import 'package:tavo/feature/notifications/ui/logic/notifications_state.dart';
 
 class NotificationsCubit extends Cubit<NotificationsState> {
-  NotificationsCubit() : super(NotificationsState.initial());
+  final NotificationsRepo _repo;
 
-  Future<void> loadMock() async {
-    emit(state.copyWith(isLoading: true));
+  NotificationsCubit(this._repo) : super(const NotificationsState());
 
-    // UI Mock (بدّلها لاحقًا بـ API)
-    final data = <AppNotification>[
-      // اليوم
-      const AppNotification(
-        id: '1',
-        section: NotificationSection.today,
-        title: 'إلغاء حجز',
-        message: 'تم إلغاء حجزك رقم #250041 من طرف المطعم',
-        timeAgo: '3د',
-        isRead: false,
-      ),
-      const AppNotification(
-        id: '2',
-        section: NotificationSection.today,
-        title: 'إلغاء حجز',
-        message: 'تم إلغاء حجزك رقم #250041 من طرف المطعم',
-        timeAgo: '3د',
-        isRead: false,
-      ),
-      const AppNotification(
-        id: '3',
-        section: NotificationSection.today,
-        title: 'إلغاء حجز',
-        message: 'تم إلغاء حجزك رقم #250041 من طرف المطعم',
-        timeAgo: '3د',
-        isRead: true,
-      ),
+  Future<void> loadNotifications(String locale) async {
+    if (isClosed) return;
+    emit(state.copyWith(isLoading: true, error: null));
 
-      // أمس
-      const AppNotification(
-        id: '4',
-        section: NotificationSection.yesterday,
-        title: 'إلغاء حجز',
-        message: 'تم إلغاء حجزك رقم #250041 من طرف المطعم',
-        timeAgo: '3د',
-        isRead: true,
-      ),
-      const AppNotification(
-        id: '5',
-        section: NotificationSection.yesterday,
-        title: 'إلغاء حجز',
-        message: 'تم إلغاء حجزك رقم #250041 من طرف المطعم',
-        timeAgo: '3د',
-        isRead: true,
-      ),
-    ];
+    try {
+      final results = await Future.wait([
+        _repo.getNotifications(locale),
+        _repo.getUnreadCount(),
+      ]);
 
-    emit(state.copyWith(isLoading: false, items: data));
+      if (isClosed) return;
+
+      emit(state.copyWith(
+        isLoading: false,
+        notifications: (results[0] as List).cast(),
+        unreadCount: results[1] as int,
+      ));
+    } on ApiException catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(isLoading: false, error: e.message));
+    } catch (e) {
+      if (isClosed) return;
+      emit(state.copyWith(isLoading: false, error: e.toString()));
+    }
   }
 
-  void markAllAsRead() {
-    final updated = state.items.map((e) => e.copyWith(isRead: true)).toList();
-    emit(state.copyWith(items: updated));
+  Future<void> markAsRead(String id) async {
+    final updated = state.notifications.map((n) {
+      if (n.id == id) return n.copyWith(isRead: true);
+      return n;
+    }).toList();
+    final newUnread = updated.where((n) => !n.isRead).length;
+    emit(state.copyWith(notifications: updated, unreadCount: newUnread));
+
+    try {
+      await _repo.markAsRead(id);
+    } catch (_) {}
   }
 
-  void markAsRead(String id) {
-    final updated = state.items
-        .map((e) => e.id == id ? e.copyWith(isRead: true) : e)
-        .toList();
-    emit(state.copyWith(items: updated));
+  Future<void> markAllAsRead() async {
+    final updated = state.notifications.map((n) => n.copyWith(isRead: true)).toList();
+    emit(state.copyWith(notifications: updated, unreadCount: 0));
+
+    try {
+      await _repo.markAllAsRead();
+    } catch (_) {}
+  }
+
+  Future<void> refresh(String locale) async {
+    await loadNotifications(locale);
   }
 }

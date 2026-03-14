@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -7,7 +10,6 @@ import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/core/theme/theme_extensions.dart';
 import 'package:tavo/feature/restaurant/data/model/restaurant_details_model.dart';
-
 
 class RestaurantDetailsHeader extends StatelessWidget {
   final RestaurantDetailsModel restaurant;
@@ -32,11 +34,36 @@ class RestaurantDetailsHeader extends StatelessWidget {
     final imageHeight = 245.h;
     final barHeight = 60.h;
     final logoSize = 92.r;
+    final isRtl = context.locale.languageCode == 'ar';
 
     final images = galleryImages.take(5).toList();
     final mainImageUrl = images.isNotEmpty && selectedIndex < images.length
         ? images[selectedIndex]
         : restaurant.logoUrl;
+
+    final titleWidget = Expanded(
+      child: Text(
+        restaurant.getName(locale),
+        style: TextStyles.font18Black500Weight(context),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+    );
+
+    final categoryWidget = Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 10.w,
+        vertical: 8.h,
+      ),
+      decoration: BoxDecoration(
+        color: ColorsManager.secondaryColor,
+        borderRadius: BorderRadius.circular(32.r),
+      ),
+      child: Text(
+        restaurant.getFirstCategoryName(locale),
+        style: TextStyles.font12White400Weight(context),
+      ),
+    );
 
     return SizedBox(
       height: imageHeight + barHeight,
@@ -70,7 +97,7 @@ class RestaurantDetailsHeader extends StatelessWidget {
                   top: 18.h,
                   right: 16.w,
                   child: _CircleIcon(
-                    icon: AppAssets.arrowRight,
+                    icon:  AppAssets.arrowRight,
                     onTap: onBack,
                   ),
                 ),
@@ -94,42 +121,25 @@ class RestaurantDetailsHeader extends StatelessWidget {
             height: barHeight,
             child: Container(
               color: const Color(0xFFF7F7F7),
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Row(
-                children: [
-                  SizedBox(width: logoSize + 12.w),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            restaurant.getName(locale),
-                            style: TextStyles.font18Black500Weight(context),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 8.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: ColorsManager.secondaryColor,
-                            borderRadius: BorderRadius.circular(32.r),
-                          ),
-                          child: Text(
-                            restaurant.getFirstCategoryName(locale),
-                            style: TextStyles.font12White400Weight(context).copyWith(
-                              // fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              padding: EdgeInsets.only(
+                left: 16.w,
+                right: logoSize + 28.w,
+              ),
+              child: Directionality(
+                textDirection:ui. TextDirection.ltr,
+                child: Row(
+                  children: isRtl
+                      ? [
+                          titleWidget,
+                          SizedBox(width: 12.w),
+                          categoryWidget,
+                        ]
+                      : [
+                          categoryWidget,
+                          SizedBox(width: 12.w),
+                          titleWidget,
+                        ],
+                ),
               ),
             ),
           ),
@@ -199,7 +209,6 @@ class _RatingPill extends StatelessWidget {
             rating,
             style: TextStyles.font14Black500Weight(context).copyWith(
               color: ColorsManager.secondary100,
-              // fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(width: 4.w),
@@ -302,4 +311,3 @@ class _GalleryStrip extends StatelessWidget {
     );
   }
 }
-  

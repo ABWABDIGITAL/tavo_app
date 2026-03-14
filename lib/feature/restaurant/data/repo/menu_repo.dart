@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:tavo/core/network/api_constants.dart';
 import 'package:tavo/core/network/api_service.dart';
+import 'package:tavo/feature/restaurant/data/model/menu_item_model.dart';
 import 'package:tavo/feature/restaurant/data/model/menu_response.dart';
-
 
 class MenuRepo {
   final ApiService _apiService;
@@ -11,60 +11,48 @@ class MenuRepo {
 
   Future<MenuResponse> getMenu({
     required String restaurantId,
+    int page = 1,
+    int limit = 12,
     String? categoryId,
-    int? page,
-    int? limit,
   }) async {
     try {
-      final queryParams = <String, dynamic>{};
-      
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+      };
+
       if (categoryId != null && categoryId.isNotEmpty) {
         queryParams['categoryId'] = categoryId;
-      }
-      if (page != null) {
-        queryParams['page'] = page;
-      }
-      if (limit != null) {
-        queryParams['limit'] = limit;
       }
 
       final response = await _apiService.get(
         ApiConstants.restaurantMenu(restaurantId),
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+        queryParameters: queryParams,
       );
-      
-      return MenuResponse.fromJson(response.data);
+
+      final data = response.data as Map<String, dynamic>;
+      return MenuResponse.fromJson(data);
     } on DioException catch (e) {
-      throw _handleDioError(e);
-    } catch (e) {
-      throw e.toString();
+      throw _handleError(e);
     }
   }
 
-  String _handleDioError(DioException e) {
+  String _handleError(DioException e) {
     if (e.response?.data != null) {
       final data = e.response?.data;
-      if (data is String && data.contains('<!DOCTYPE html>')) {
-        return 'API endpoint not found';
-      }
-      if (data is String) {
-        return data;
-      }
       if (data is Map<String, dynamic>) {
-        return data['message']?.toString() ??
-            data['error']?.toString() ??
-            'Something went wrong';
+        return data['message']?.toString() ?? 'حدث خطأ';
       }
     }
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'Connection timeout';
+        return 'انتهت مهلة الاتصال';
       case DioExceptionType.connectionError:
-        return 'No internet connection';
+        return 'لا يوجد اتصال بالإنترنت';
       default:
-        return 'Something went wrong';
+        return 'حدث خطأ';
     }
   }
 }

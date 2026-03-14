@@ -8,6 +8,8 @@ class MenuItemModel {
   final double? oldPrice;
   final String imageUrl;
   final String categoryId;
+  final String categoryNameAr;
+  final String categoryNameEn;
   final bool isAvailable;
 
   MenuItemModel({
@@ -20,35 +22,63 @@ class MenuItemModel {
     this.oldPrice,
     required this.imageUrl,
     required this.categoryId,
-    required this.isAvailable,
+    this.categoryNameAr = '',
+    this.categoryNameEn = '',
+    this.isAvailable = true,
   });
 
   factory MenuItemModel.fromJson(Map<String, dynamic> json) {
+    String imageUrl = '';
+    if (json['image'] != null) {
+      if (json['image'] is Map) {
+        imageUrl = json['image']['url'] ?? '';
+      } else if (json['image'] is String) {
+        imageUrl = json['image'];
+      }
+    }
+    imageUrl = _fixImageUrl(imageUrl);
+
+    String categoryId = '';
+    String categoryNameAr = '';
+    String categoryNameEn = '';
+
+    if (json['menuCategoryId'] != null) {
+      if (json['menuCategoryId'] is Map) {
+        categoryId = json['menuCategoryId']['_id'] ?? '';
+        categoryNameAr = json['menuCategoryId']['ar']?['name'] ?? '';
+        categoryNameEn = json['menuCategoryId']['en']?['name'] ?? '';
+      } else if (json['menuCategoryId'] is String) {
+        categoryId = json['menuCategoryId'];
+      }
+    }
+
     return MenuItemModel(
       id: json['_id'] ?? json['id'] ?? '',
-      titleAr: json['ar']?['title'] ?? json['ar']?['name'] ?? json['title'] ?? '',
-      titleEn: json['en']?['title'] ?? json['en']?['name'] ?? json['title'] ?? '',
-      descriptionAr: json['ar']?['description'] ?? json['description'] ?? '',
-      descriptionEn: json['en']?['description'] ?? json['description'] ?? '',
+      titleAr: json['ar']?['name'] ?? json['ar']?['title'] ?? '',
+      titleEn: json['en']?['name'] ?? json['en']?['title'] ?? '',
+      descriptionAr: json['ar']?['description'] ?? '',
+      descriptionEn: json['en']?['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
       oldPrice: json['oldPrice'] != null ? (json['oldPrice']).toDouble() : null,
-      imageUrl: _fixImageUrl(json['imageUrl'] ?? json['image']),
-      categoryId: json['categoryId'] ?? json['category'] ?? '',
+      imageUrl: imageUrl,
+      categoryId: categoryId,
+      categoryNameAr: categoryNameAr,
+      categoryNameEn: categoryNameEn,
       isAvailable: json['isAvailable'] ?? true,
     );
   }
 
   static String _fixImageUrl(String? url) {
-    if (url == null) return '';
+    if (url == null || url.isEmpty) return '';
     return url.replaceAll('undefined', '');
   }
 
-  // ✅ Add these getters for backward compatibility
   String get title => titleAr.isNotEmpty ? titleAr : titleEn;
   String get description => descriptionAr.isNotEmpty ? descriptionAr : descriptionEn;
 
   String getTitle(String locale) => locale == 'ar' ? titleAr : titleEn;
   String getDescription(String locale) => locale == 'ar' ? descriptionAr : descriptionEn;
+  String getCategoryName(String locale) => locale == 'ar' ? categoryNameAr : categoryNameEn;
 
   bool get hasDiscount => oldPrice != null && oldPrice! > price;
 }

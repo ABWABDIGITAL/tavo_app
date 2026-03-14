@@ -1,3 +1,5 @@
+import 'package:tavo/feature/restaurant/data/model/menu_category_model.dart';
+
 import 'menu_item_model.dart';
 
 class MenuResponse {
@@ -46,28 +48,6 @@ class MenuData {
           : null,
     );
   }
-}
-
-class MenuCategoryModel {
-  final String id;
-  final String nameAr;
-  final String nameEn;
-
-  MenuCategoryModel({
-    required this.id,
-    required this.nameAr,
-    required this.nameEn,
-  });
-
-  factory MenuCategoryModel.fromJson(Map<String, dynamic> json) {
-    return MenuCategoryModel(
-      id: json['_id'] ?? '',
-      nameAr: json['ar']?['name'] ?? '',
-      nameEn: json['en']?['name'] ?? '',
-    );
-  }
-
-  String getName(String locale) => locale == 'ar' ? nameAr : nameEn;
 }
 
 class PaginationModel {

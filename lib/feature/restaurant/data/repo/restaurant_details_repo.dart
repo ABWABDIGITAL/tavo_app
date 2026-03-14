@@ -3,49 +3,40 @@ import 'package:tavo/core/network/api_constants.dart';
 import 'package:tavo/core/network/api_service.dart';
 import 'package:tavo/feature/restaurant/data/model/restaurant_details_response.dart';
 
-
 class RestaurantDetailsRepo {
   final ApiService _apiService;
 
   RestaurantDetailsRepo(this._apiService);
 
-  Future<RestaurantDetailsResponse> getRestaurantDetails(String id) async {
+  Future<RestaurantDetailsResponse> getRestaurantDetails(String restaurantId) async {
     try {
       final response = await _apiService.get(
-        ApiConstants.restaurantDetails(id),
+        ApiConstants.restaurantDetails(restaurantId),
       );
-      return RestaurantDetailsResponse.fromJson(response.data);
+
+      final data = response.data as Map<String, dynamic>;
+      return RestaurantDetailsResponse.fromJson(data);
     } on DioException catch (e) {
-      throw _handleDioError(e);
-    } catch (e) {
-      throw e.toString();
+      throw _handleError(e);
     }
   }
 
-  String _handleDioError(DioException e) {
+  String _handleError(DioException e) {
     if (e.response?.data != null) {
       final data = e.response?.data;
-      if (data is String && data.contains('<!DOCTYPE html>')) {
-        return 'API endpoint not found';
-      }
-      if (data is String) {
-        return data;
-      }
       if (data is Map<String, dynamic>) {
-        return data['message']?.toString() ??
-            data['error']?.toString() ??
-            'Something went wrong';
+        return data['message']?.toString() ?? 'حدث خطأ';
       }
     }
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return 'Connection timeout';
+        return 'انتهت مهلة الاتصال';
       case DioExceptionType.connectionError:
-        return 'No internet connection';
+        return 'لا يوجد اتصال بالإنترنت';
       default:
-        return 'Something went wrong';
+        return 'حدث خطأ';
     }
   }
 }

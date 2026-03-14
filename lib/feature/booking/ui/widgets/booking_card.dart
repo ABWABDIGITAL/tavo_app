@@ -1,8 +1,10 @@
 // lib/feature/booking/ui/widgets/booking_card.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tavo/core/constants/app_assets.dart';
+import 'package:tavo/core/localization/locale_keys.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/core/theme/theme_extensions.dart';
@@ -50,20 +52,19 @@ class BookingCard extends StatelessWidget {
       child: Column(
         children: [
           _buildTopSection(context),
-            SizedBox(height: 8.h),
-              Row(
-                children: [
-                  Text(
-                    restaurantName,
-                    style: TextStyles.font14Black500Weight(context).copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  _PriceBadge(total: total),
-                ],
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              Text(
+                restaurantName,
+                style: TextStyles.font14Black500Weight(context).copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              
+              const Spacer(),
+              _PriceBadge(total: total),
+            ],
+          ),
           SizedBox(height: 12.h),
           _buildInfoSection(context),
           SizedBox(height: 14.h),
@@ -82,10 +83,8 @@ class BookingCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'رقم الحجز',
-                style: TextStyles.font12DarkGray400Weight(context).copyWith(
-                  
-                ),
+                LocaleKeys.bookingNumber.tr(),
+                style: TextStyles.font12DarkGray400Weight(context),
               ),
               SizedBox(height: 2.h),
               Text(
@@ -94,11 +93,9 @@ class BookingCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            
             ],
           ),
         ),
-      
         ClipRRect(
           borderRadius: BorderRadius.circular(12.r),
           child: Image.network(
@@ -121,7 +118,6 @@ class BookingCard extends StatelessWidget {
             ),
           ),
         ),
-        
       ],
     );
   }
@@ -129,7 +125,6 @@ class BookingCard extends StatelessWidget {
   Widget _buildInfoSection(BuildContext context) {
     return Row(
       children: [
-        
         SizedBox(width: 12.w),
         Expanded(
           child: Column(
@@ -141,13 +136,18 @@ class BookingCard extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               Row(
-                children: [  _InfoRow(
-                iconData: Icons.access_time_rounded,
-                text: dateTimeText,
-              ),Spacer(),_InfoRow(
-          icon: AppAssets.chair,
-          text: seatsText,
-        ),]),
+                children: [
+                  _InfoRow(
+                    iconData: Icons.access_time_rounded,
+                    text: dateTimeText,
+                  ),
+                  const Spacer(),
+                  _InfoRow(
+                    icon: AppAssets.chair,
+                    text: seatsText,
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -162,7 +162,7 @@ class BookingCard extends StatelessWidget {
           children: [
             Expanded(
               child: _ActionButton(
-                text: 'عرض تفاصيل',
+                text: LocaleKeys.viewDetails.tr(),
                 type: _ButtonType.secondary,
                 onPressed: onDetails,
               ),
@@ -170,7 +170,7 @@ class BookingCard extends StatelessWidget {
             SizedBox(width: 10.w),
             Expanded(
               child: _ActionButton(
-                text: 'حذف',
+                text: LocaleKeys.delete.tr(),
                 type: _ButtonType.danger,
                 onPressed: onDelete,
               ),
@@ -182,7 +182,7 @@ class BookingCard extends StatelessWidget {
           children: [
             Expanded(
               child: _ActionButton(
-                text: 'عرض تفاصيل',
+                text: LocaleKeys.viewDetails.tr(),
                 type: _ButtonType.secondary,
                 onPressed: onDetails,
               ),
@@ -190,7 +190,7 @@ class BookingCard extends StatelessWidget {
             SizedBox(width: 10.w),
             Expanded(
               child: _ActionButton(
-                text: 'تقييم',
+                text: LocaleKeys.rate.tr(),
                 type: _ButtonType.success,
                 onPressed: onRate,
               ),
@@ -202,7 +202,7 @@ class BookingCard extends StatelessWidget {
           children: [
             Expanded(
               child: _ActionButton(
-                text: 'عرض تفاصيل',
+                text: LocaleKeys.viewDetails.tr(),
                 type: _ButtonType.primary,
                 onPressed: onDetails,
               ),
@@ -210,7 +210,7 @@ class BookingCard extends StatelessWidget {
             SizedBox(width: 10.w),
             Expanded(
               child: _ActionButton(
-                text: 'إلغاء الحجز',
+                text: LocaleKeys.cancelBooking.tr(),
                 type: _ButtonType.outlinedDanger,
                 onPressed: onCancel,
               ),
@@ -235,10 +235,9 @@ class _PriceBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Text(
-        '${total.toStringAsFixed(0)} ر.س',
+        '${total.toStringAsFixed(0)} ${LocaleKeys.currencySar.tr()}',
         style: TextStyles.font12DarkGray400Weight(context).copyWith(
           color: const Color(0xFF22A83A),
-          
         ),
       ),
     );
@@ -283,10 +282,7 @@ class _InfoRow extends StatelessWidget {
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyles.font12DarkGray400Weight(context).copyWith(
-              
-             
-            ),
+            style: TextStyles.font12DarkGray400Weight(context),
           ),
         ),
       ],

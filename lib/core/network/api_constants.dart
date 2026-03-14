@@ -7,6 +7,7 @@ class ApiConstants {
   static const String verifyOtp = '/v1/api/auth/verify-otp';
   static const String home = '/v1/api/home';
   static const String restaurants = '/v1/api/restaurant';
-  static String restaurantDetails(String id) => '/v1/api/restaurant/$id';
-   static String restaurantMenu(String id) => '/v1/api/restaurant/$id/menu';
+  static String restaurantDetails(String id) => '/v1/api/restaurant/$id'; 
+     static String userProfile(String id) => '/v1/api/user/$id';
+     static String restaurantMenu(String id) => '/v1/api/menu-item/$id/';
 }

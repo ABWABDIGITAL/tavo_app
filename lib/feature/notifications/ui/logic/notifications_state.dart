@@ -1,36 +1,35 @@
-// lib/ui/cubit/notifications_state.dart
-
-
-import '../../data/model/app_notification.dart';
+// lib/feature/notifications/ui/logic/notifications_state.dart
+import 'package:tavo/feature/notifications/data/model/app_notification.dart';
 
 class NotificationsState {
   final bool isLoading;
-  final List<AppNotification> items;
+  final List<AppNotification> notifications;
+  final String? error;
+  final int unreadCount;
 
   const NotificationsState({
-    required this.isLoading,
-    required this.items,
+    this.isLoading = false,
+    this.notifications = const [],
+    this.error,
+    this.unreadCount = 0,
   });
 
-  factory NotificationsState.initial() {
-    return const NotificationsState(isLoading: false, items: []);
-  }
+  List<AppNotification> get today => notifications.where((n) => n.isToday).toList();
+  List<AppNotification> get yesterday => notifications.where((n) => n.isYesterday).toList();
+  List<AppNotification> get older => notifications.where((n) => n.isOlder).toList();
+  bool get hasUnread => unreadCount > 0 || notifications.any((n) => !n.isRead);
 
   NotificationsState copyWith({
     bool? isLoading,
-    List<AppNotification>? items,
+    List<AppNotification>? notifications,
+    String? error,
+    int? unreadCount,
   }) {
     return NotificationsState(
       isLoading: isLoading ?? this.isLoading,
-      items: items ?? this.items,
+      notifications: notifications ?? this.notifications,
+      error: error,
+      unreadCount: unreadCount ?? this.unreadCount,
     );
   }
-
-  List<AppNotification> get today =>
-      items.where((e) => e.section == NotificationSection.today).toList();
-
-  List<AppNotification> get yesterday =>
-      items.where((e) => e.section == NotificationSection.yesterday).toList();
-
-  bool get hasUnread => items.any((e) => !e.isRead);
 }

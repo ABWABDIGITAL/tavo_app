@@ -1,30 +1,49 @@
+// lib/feature/restaurant/ui/screens/meal_customization_screen.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tavo/core/di/service_locator.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
-import 'package:tavo/feature/restaurant/data/model/menu_item_model.dart';
+import 'package:tavo/feature/restaurant/data/model/cart_item_model.dart';
+import 'package:tavo/feature/restaurant/data/model/menu_item_specification_model.dart';
+import 'package:tavo/feature/restaurant/ui/logic/menu_item_specification_cubit.dart';
+import 'package:tavo/feature/restaurant/ui/logic/menu_item_specification_state.dart';
+import 'package:tavo/feature/restaurant/ui/logic/order_cubit.dart';
 
+class MealCustomizationScreen extends StatelessWidget {
+  final String restaurantId;
+  final String menuItemId;
 
-class MealCustomizationScreen extends StatefulWidget {
-  final MenuItemModel item;
-
-  const MealCustomizationScreen({super.key, required this.item});
+  const MealCustomizationScreen({
+    super.key,
+    required this.restaurantId,
+    required this.menuItemId,
+  });
 
   @override
-  State<MealCustomizationScreen> createState() => _MealCustomizationScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<MenuItemSpecificationCubit>(
+        param1: restaurantId,
+        param2: menuItemId,
+      )..loadSpecification(),
+      child: const _MealCustomizationView(),
+    );
+  }
 }
 
-class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
+class _MealCustomizationView extends StatefulWidget {
+  const _MealCustomizationView();
+
+  @override
+  State<_MealCustomizationView> createState() => _MealCustomizationViewState();
+}
+
+class _MealCustomizationViewState extends State<_MealCustomizationView> {
   final _notesController = TextEditingController();
-
-  final _cookMethods = const ['مقلي', 'مشوي', 'مسلوق', 'مطهو بالفرن'];
-  final _sides = const ['أرز أبيض', 'بطاطس مقلية', 'خضار سوتيه', 'سلطة'];
-  final _sizes = const ['حجم صغير', 'حجم متوسط', 'حجم كبير'];
-
-  String? _selectedCook;
-  final Set<String> _selectedSides = {};
-  String? _selectedSize;
 
   @override
   void dispose() {
@@ -32,73 +51,141 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
     super.dispose();
   }
 
+  /// ✅ Build CartItemModel from selections and add to OrderCubit
+  void _onConfirm() {
+    final specCubit = context.read<MenuItemSpecificationCubit>();
+    final specState = specCubit.state;
+    final spec = specState.specification;
+    if (spec == null) return;
+
+    final locale = context.locale.languageCode;
+
+    // Build specifications list from selections
+    final List<CartSpecification> cartSpecs = [];
+
+    specState.selections.forEach((groupKey, value) {
+      if (value is SpecificationOption) {
+        cartSpecs.add(CartSpecification(
+          key: groupKey,
+          name: value.title,
+          price: value.price,
+        ));
+      } else if (value is Set<SpecificationOption>) {
+        for (final option in value) {
+          cartSpecs.add(CartSpecification(
+            key: groupKey,
+            name: option.title,
+            price: option.price,
+          ));
+        }
+      }
+    });
+
+    // Create cart item
+    final cartItem = CartItemModel(
+      menuItemId: spec.id,
+      name: spec.getName(locale),
+      imageUrl: spec.imageUrl,
+      price: spec.price,
+      quantity: specState.quantity,
+      specifications: cartSpecs,
+    );
+
+    // Add to order cubit (provided by parent screen)
+    try {
+      context.read<OrderCubit>().addToCart(cartItem);
+    } catch (_) {
+      // OrderCubit not provided - just pop
+    }
+
+    Navigator.of(context).pop(cartItem);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
-    final locale = context.locale.languageCode;  // ✅ Get locale
+    final locale = context.locale.languageCode;
 
     return Scaffold(
       backgroundColor: ColorsManager.white,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
-          child: Column(
-            children: [
-              _buildHeader(context),
-              SizedBox(height: 12.h),
-              _buildImageBanner(context, item, locale),  // ✅ Pass locale
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(top: 12.h, bottom: 12.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionTitle(context, 'cooking_method'.tr()),
-                      SizedBox(height: 8.h),
-                      _buildOptionsWrap(
-                        options: _cookMethods,
-                        selectedCheck: (t) => _selectedCook == t,
-                        onSelect: (t) => setState(() => _selectedCook = t),
-                      ),
-                      SizedBox(height: 14.h),
-                      _buildSectionTitleWithPrice(context, 'side_dishes'.tr(), '36 ${'currency'.tr()}'),
-                      SizedBox(height: 8.h),
-                      _buildOptionsWrap(
-                        options: _sides,
-                        selectedCheck: (t) => _selectedSides.contains(t),
-                        onSelect: (t) {
-                          setState(() {
-                            if (_selectedSides.contains(t)) {
-                              _selectedSides.remove(t);
-                            } else {
-                              _selectedSides.add(t);
-                            }
-                          });
-                        },
-                      ),
-                      SizedBox(height: 14.h),
-                      _buildSectionTitleWithPrice(
-                        context,
-                        'dish_size'.tr(),
-                        '${item.price.toStringAsFixed(0)} ${'currency'.tr()}',
-                      ),
-                      SizedBox(height: 8.h),
-                      _buildOptionsWrap(
-                        options: _sizes,
-                        selectedCheck: (t) => _selectedSize == t,
-                        onSelect: (t) => setState(() => _selectedSize = t),
-                      ),
-                      SizedBox(height: 14.h),
-                      _buildSectionTitle(context, 'notes'.tr()),
-                      SizedBox(height: 8.h),
-                      _buildNotesField(context),
-                    ],
-                  ),
+        child: BlocBuilder<MenuItemSpecificationCubit, MenuItemSpecificationState>(
+          builder: (context, state) {
+            if (state.loading) {
+              return const Center(
+                child: CircularProgressIndicator(color: ColorsManager.primaryColor),
+              );
+            }
+
+            if (state.error != null) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48.r, color: ColorsManager.darkGray300),
+                    SizedBox(height: 12.h),
+                    Text(state.error!, style: TextStyles.font14DarkGray400Weight(context)),
+                    SizedBox(height: 16.h),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<MenuItemSpecificationCubit>().loadSpecification(),
+                      child: Text('retry'.tr()),
+                    ),
+                  ],
                 ),
+              );
+            }
+
+            final spec = state.specification;
+            if (spec == null) return const SizedBox.shrink();
+
+            return Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  SizedBox(height: 12.h),
+                  _buildImageBanner(context, spec, locale),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(top: 12.h, bottom: 12.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...spec.getSpecifications(locale).map((group) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (group.options.any((o) => o.price > 0))
+                                  _buildSectionTitleWithPrice(
+                                    context,
+                                    group.title,
+                                    '${group.options.where((o) => o.price > 0).first.price.toStringAsFixed(0)} ${'currency'.tr()}',
+                                  )
+                                else
+                                  _buildSectionTitle(context, group.title),
+                                SizedBox(height: 8.h),
+                                _buildOptionsWrap(
+                                  options: group.options,
+                                  groupKey: group.key,
+                                  type: group.type,
+                                  state: state,
+                                ),
+                                SizedBox(height: 14.h),
+                              ],
+                            );
+                          }),
+                          _buildSectionTitle(context, 'notes'.tr()),
+                          SizedBox(height: 8.h),
+                          _buildNotesField(context),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _buildConfirmButton(context, state),
+                ],
               ),
-              _buildConfirmButton(context),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -137,7 +224,11 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
     );
   }
 
-  Widget _buildImageBanner(BuildContext context, MenuItemModel item, String locale) {
+  Widget _buildImageBanner(
+    BuildContext context,
+    MenuItemSpecificationModel spec,
+    String locale,
+  ) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(14.r),
       child: Stack(
@@ -145,10 +236,11 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
           SizedBox(
             height: 110.h,
             width: double.infinity,
-            child: Image.network(
-              item.imageUrl,
+            child: CachedNetworkImage(
+              imageUrl: spec.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: ColorsManager.grey100),
+              placeholder: (_, __) => Container(color: ColorsManager.grey100),
+              errorWidget: (_, __, ___) => Container(color: ColorsManager.grey100),
             ),
           ),
           Positioned.fill(
@@ -159,7 +251,7 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    ColorsManager.black.withValues(alpha: 0.5),
+                    ColorsManager.black.withOpacity(0.5),
                   ],
                 ),
               ),
@@ -169,7 +261,7 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
             bottom: 10.h,
             start: 12.w,
             child: Text(
-              item.getTitle(locale),  // ✅ Fixed: use getTitle(locale)
+              spec.getName(locale),
               style: TextStyles.font14White500Weight(context).copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -181,19 +273,13 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
-    return Text(
-      title,
-      style: TextStyles.font16Black500Weight(context),
-    );
+    return Text(title, style: TextStyles.font16Black500Weight(context));
   }
 
   Widget _buildSectionTitleWithPrice(BuildContext context, String title, String price) {
     return Row(
       children: [
-        Text(
-          title,
-          style: TextStyles.font16Black500Weight(context),
-        ),
+        Text(title, style: TextStyles.font16Black500Weight(context)),
         SizedBox(width: 8.w),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
@@ -214,18 +300,31 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
   }
 
   Widget _buildOptionsWrap({
-    required List<String> options,
-    required bool Function(String) selectedCheck,
-    required void Function(String) onSelect,
+    required List<SpecificationOption> options,
+    required String groupKey,
+    required SpecificationType type,
+    required MenuItemSpecificationState state,
   }) {
+    final cubit = context.read<MenuItemSpecificationCubit>();
+
     return Wrap(
       spacing: 8.w,
       runSpacing: 8.h,
-      children: options.map((t) {
+      children: options.map((option) {
+        final isSelected = cubit.isOptionSelected(groupKey, option);
+
         return _OptionChip(
-          text: t,
-          selected: selectedCheck(t),
-          onTap: () => onSelect(t),
+          text: option.price > 0
+              ? '${option.title} (+${option.price.toStringAsFixed(0)})'
+              : option.title,
+          selected: isSelected,
+          onTap: () {
+            if (type == SpecificationType.single) {
+              cubit.selectSingleOption(groupKey, option);
+            } else {
+              cubit.toggleMultipleOption(groupKey, option);
+            }
+          },
         );
       }).toList(),
     );
@@ -244,6 +343,7 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
         minLines: 3,
         maxLines: 5,
         style: TextStyles.font12Black400Weight(context),
+        onChanged: (v) => context.read<MenuItemSpecificationCubit>().updateNotes(v),
         decoration: InputDecoration(
           border: InputBorder.none,
           isDense: true,
@@ -259,12 +359,13 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
     );
   }
 
-  Widget _buildConfirmButton(BuildContext context) {
+  // ✅ Confirm button now adds to cart
+  Widget _buildConfirmButton(BuildContext context, MenuItemSpecificationState state) {
     return SizedBox(
       height: 48.h,
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => Navigator.of(context).maybePop(),
+        onPressed: _onConfirm,
         style: ElevatedButton.styleFrom(
           elevation: 0,
           shadowColor: Colors.transparent,
@@ -274,7 +375,7 @@ class _MealCustomizationScreenState extends State<MealCustomizationScreen> {
           ),
         ),
         child: Text(
-          'confirm_customization'.tr(),
+          '${'confirm_customization'.tr()} - ${state.totalPrice.toStringAsFixed(0)} ${'currency'.tr()}',
           style: TextStyles.font14White500Weight(context).copyWith(
             color: ColorsManager.black,
             fontWeight: FontWeight.w600,
@@ -299,7 +400,7 @@ class _OptionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = selected ? ColorsManager.secondary100 : ColorsManager.grey200;
-    final bg = selected ? ColorsManager.secondary100.withValues(alpha: 0.1) : ColorsManager.white;
+    final bg = selected ? ColorsManager.secondary100.withOpacity(0.1) : ColorsManager.white;
 
     return GestureDetector(
       onTap: onTap,
