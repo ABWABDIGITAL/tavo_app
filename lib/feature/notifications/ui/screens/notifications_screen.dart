@@ -13,7 +13,7 @@ import 'package:tavo/feature/notifications/ui/logic/notifications_cubit.dart';
 import 'package:tavo/feature/notifications/ui/logic/notifications_state.dart';
 import 'package:tavo/feature/notifications/ui/logic/widgets/notification_tile.dart';
 import 'package:tavo/feature/notifications/ui/logic/widgets/notifications_section_header.dart';
-import 'package:tavo/feature/profile/ui/widgets/profile_widgets.dart';
+import 'package:tavo/feature/Profile/ui/widgets/profile_widgets.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});

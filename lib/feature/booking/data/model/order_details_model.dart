@@ -8,6 +8,8 @@ class OrderDetailsModel {
   final String restaurantLogo;
   final String restaurantId;
   final List<OrderMenuItem> menuItems;
+  final double subtotal;
+  final double tax;
   final double totalPrice;
   final String createdAt;
   final String formattedDate;
@@ -21,6 +23,8 @@ class OrderDetailsModel {
     required this.restaurantLogo,
     required this.restaurantId,
     required this.menuItems,
+    required this.subtotal,
+    required this.tax,
     required this.totalPrice,
     required this.createdAt,
     required this.formattedDate,
@@ -42,17 +46,15 @@ class OrderDetailsModel {
       restId = restaurant;
     }
 
-    final items = (json['menuItems'] as List<dynamic>?)
+    final items =
+        (json['menuItems'] as List<dynamic>?)
             ?.map((e) => OrderMenuItem.fromJson(e))
             .toList() ??
         [];
 
-    double total = (json['totalPrice'] ?? 0).toDouble();
-    if (total == 0) {
-      for (final item in items) {
-        total += item.price * item.quantity;
-      }
-    }
+    final subtotalValue = (json['subtotal'] ?? 0).toDouble();
+    final taxValue = (json['tax'] ?? 0).toDouble();
+    final totalValue = (json['totalPrice'] ?? 0).toDouble();
 
     return OrderDetailsModel(
       id: json['_id'] ?? '',
@@ -63,7 +65,9 @@ class OrderDetailsModel {
       restaurantLogo: logoUrl,
       restaurantId: restId,
       menuItems: items,
-      totalPrice: total,
+      subtotal: subtotalValue,
+      tax: taxValue,
+      totalPrice: totalValue,
       createdAt: json['createdAt'] ?? '',
       formattedDate: _formatDate(json['createdAt']),
     );
@@ -129,9 +133,11 @@ class OrderDetailsModel {
         'سبتمبر',
         'أكتوبر',
         'نوفمبر',
-        'ديسمبر'
+        'ديسمبر',
       ];
-      final hour = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
+      final hour = date.hour > 12
+          ? date.hour - 12
+          : (date.hour == 0 ? 12 : date.hour);
       final period = date.hour >= 12 ? 'م' : 'ص';
       final minute = date.minute.toString().padLeft(2, '0');
       return '${date.day} ${months[date.month]} ${date.year} - $hour:$minute $period';
@@ -143,76 +149,77 @@ class OrderDetailsModel {
 
 class OrderMenuItem {
   final String id;
-  final String nameAr;
-  final String nameEn;
-  final double price;
-  final String imageUrl;
+  final String name;
+  final double unitPrice;
+  final double lineTotal;
   final int quantity;
   final List<OrderSpecification> specifications;
 
   OrderMenuItem({
     required this.id,
-    required this.nameAr,
-    required this.nameEn,
-    required this.price,
-    required this.imageUrl,
+    required this.name,
+    required this.unitPrice,
+    required this.lineTotal,
     required this.quantity,
     required this.specifications,
   });
 
   factory OrderMenuItem.fromJson(Map<String, dynamic> json) {
-    final menuItem = json['menuItemId'];
     String id = '';
-    String nameAr = '';
-    String nameEn = '';
-    double price = 0;
-    String imageUrl = '';
+    String name = '';
+    double unitPrice = 0;
+    double lineTotal = 0;
 
+    final menuItem = json['menuItemId'];
     if (menuItem is Map<String, dynamic>) {
       id = menuItem['_id'] ?? '';
-      nameAr = menuItem['ar']?['name'] ?? '';
-      nameEn = menuItem['en']?['name'] ?? '';
-      price = (menuItem['price'] ?? 0).toDouble();
-      imageUrl = menuItem['image']?['url'] ?? '';
+      name = menuItem['en']?['name'] ?? menuItem['ar']?['name'] ?? '';
+      unitPrice = (menuItem['price'] ?? 0).toDouble();
     } else if (menuItem is String) {
       id = menuItem;
     }
 
+    if (json['name'] != null) {
+      name = json['name'];
+    }
+    if (json['unitPrice'] != null) {
+      unitPrice = (json['unitPrice'] as num).toDouble();
+    }
+    if (json['lineTotal'] != null) {
+      lineTotal = (json['lineTotal'] as num).toDouble();
+    }
+
     return OrderMenuItem(
       id: id,
-      nameAr: nameAr,
-      nameEn: nameEn,
-      price: price,
-      imageUrl: imageUrl,
+      name: name,
+      unitPrice: unitPrice,
+      lineTotal: lineTotal,
       quantity: json['quantity'] ?? 1,
-      specifications: (json['specifications'] as List<dynamic>?)
+      specifications:
+          (json['specifications'] as List<dynamic>?)
               ?.map((e) => OrderSpecification.fromJson(e))
               .toList() ??
           [],
     );
   }
 
-  String getName(String locale) {
-    if (locale == 'ar') return nameAr;
-    return nameEn.isNotEmpty ? nameEn : nameAr;
-  }
+  String getName(String locale) => name;
 
-  double get totalPrice => price * quantity;
+  double get totalPrice => lineTotal > 0 ? lineTotal : unitPrice * quantity;
 }
 
 class OrderSpecification {
   final String key;
   final String name;
+  final double price;
 
-  OrderSpecification({
-    required this.key,
-    required this.name,
-  });
+  OrderSpecification({required this.key, required this.name, this.price = 0});
 
   factory OrderSpecification.fromJson(Map<String, dynamic> json) {
     return OrderSpecification(
       key: json['key'] ?? '',
       name: json['name'] ?? '',
+      price: (json['price'] ?? 0).toDouble(),
     );
   }
 }

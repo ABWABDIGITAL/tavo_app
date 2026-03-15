@@ -10,6 +10,7 @@ import 'package:tavo/feature/home/ui/logic/cubit/home_cubit.dart';
 import 'package:tavo/feature/home/ui/logic/cubit/home_state.dart';
 import 'package:tavo/feature/home/ui/widgets/category_chips.dart';
 import 'package:tavo/feature/home/ui/widgets/home_header.dart';
+import 'package:tavo/feature/home/ui/widgets/home_shimmer_loading.dart';
 import 'package:tavo/feature/home/ui/widgets/promo_banner.dart';
 import 'package:tavo/feature/home/ui/widgets/restaurant_card.dart';
 
@@ -31,15 +32,10 @@ class _HomeScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       body: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
           if (state is HomeLoading) {
-            return const Center(
-              child: CircularProgressIndicator.adaptive(
-                backgroundColor: ColorsManager.primaryColor,
-              ),
-            );
+            return const HomeShimmerLoading();
           }
 
           if (state is HomeError) {
@@ -109,10 +105,7 @@ class _HomeScreenContent extends StatelessWidget {
         slivers: [
           SliverPersistentHeader(
             pinned: true,
-            delegate: _HomeHeaderDelegate(
-              maxExtent: 205.h,
-              minExtent: 205.h,
-            ),
+            delegate: _HomeHeaderDelegate(maxExtent: 205.h, minExtent: 205.h),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -140,8 +133,8 @@ class _HomeScreenContent extends StatelessWidget {
                   child: Text(
                     'no_restaurants'.tr(),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: ColorsManager.darkGray300,
-                        ),
+                      color: ColorsManager.darkGray300,
+                    ),
                   ),
                 ),
               ),
@@ -156,16 +149,10 @@ class _HomeScreenContent extends StatelessWidget {
                   mainAxisSpacing: 12.h,
                   childAspectRatio: 0.68,
                 ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final restaurant = state.filteredRestaurants[index];
-                    return RestaurantCard(
-                      restaurant: restaurant,
-                      locale: locale,
-                    );
-                  },
-                  childCount: state.filteredRestaurants.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final restaurant = state.filteredRestaurants[index];
+                  return RestaurantCard(restaurant: restaurant, locale: locale);
+                }, childCount: state.filteredRestaurants.length),
               ),
             ),
           SliverToBoxAdapter(child: SizedBox(height: 20.h)),
@@ -182,10 +169,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   final double minExtent;
 
-  _HomeHeaderDelegate({
-    required this.maxExtent,
-    required this.minExtent,
-  });
+  _HomeHeaderDelegate({required this.maxExtent, required this.minExtent});
 
   @override
   Widget build(
@@ -193,10 +177,7 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return HomeHeader(
-      shrinkOffset: shrinkOffset,
-      maxExtent: maxExtent,
-    );
+    return HomeHeader(shrinkOffset: shrinkOffset, maxExtent: maxExtent);
   }
 
   @override

@@ -1,4 +1,4 @@
-// lib/feature/profile/ui/widgets/profile_widgets.dart
+// lib/feature/Profile/ui/widgets/profile_widgets.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

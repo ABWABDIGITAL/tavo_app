@@ -10,7 +10,7 @@ class OrderCubit extends Cubit<OrderState> {
   final String restaurantId;
 
   OrderCubit(this._repo, {required this.restaurantId})
-      : super(const OrderState());
+    : super(const OrderState());
 
   /// Add item with specifications to cart
   void addToCart(CartItemModel item) {
@@ -36,13 +36,15 @@ class OrderCubit extends Cubit<OrderState> {
     if (existingIndex != -1) {
       newItems[existingIndex].quantity++;
     } else {
-      newItems.add(CartItemModel(
-        menuItemId: menuItemId,
-        name: name,
-        imageUrl: imageUrl,
-        price: price,
-        quantity: 1,
-      ));
+      newItems.add(
+        CartItemModel(
+          menuItemId: menuItemId,
+          name: name,
+          imageUrl: imageUrl,
+          price: price,
+          quantity: 1,
+        ),
+      );
     }
 
     emit(state.copyWith(cartItems: newItems));
@@ -88,11 +90,19 @@ class OrderCubit extends Cubit<OrderState> {
 
       if (isClosed) return;
 
-      emit(state.copyWith(
-        submitting: false,
-        success: true,
-        orderId: response['data']?['_id'] ?? response['data']?['orderId'] ?? '',
-      ));
+      final orderData = response['data'];
+      final createdOrder = orderData != null
+          ? CreatedOrder.fromJson(orderData)
+          : null;
+
+      emit(
+        state.copyWith(
+          submitting: false,
+          success: true,
+          orderId: orderData?['_id'] ?? orderData?['orderId'] ?? '',
+          createdOrder: createdOrder,
+        ),
+      );
     } on ApiException catch (e) {
       if (isClosed) return;
       emit(state.copyWith(submitting: false, error: e.message));
@@ -107,6 +117,6 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void clearSuccess() {
-    emit(state.copyWith(success: false, orderId: null));
+    emit(state.copyWith(success: false, orderId: null, createdOrder: null));
   }
 }

@@ -12,20 +12,28 @@ import 'package:tavo/feature/restaurant/ui/screens/restaurants_screen.dart';
 import 'package:tavo/feature/booking/ui/screens/bookings_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
-  const MainNavScreen({super.key});
+  final int? initialIndex;
+
+  const MainNavScreen({super.key, this.initialIndex});
 
   @override
   State<MainNavScreen> createState() => _MainNavScreenState();
 }
 
 class _MainNavScreenState extends State<MainNavScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex ?? 0;
+  }
 
   final List<Widget> _screens = const [
     HomeScreen(),
     RestaurantsScreen(),
-   BookingsScreen(showAppBar: false,),
-   ProfileScreen(),
+    BookingsScreen(showAppBar: false),
+    ProfileScreen(),
   ];
 
   final List<_NavItemData> _navItems = const [
@@ -71,7 +79,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
     required int index,
   }) {
     final isSelected = _currentIndex == index;
-    final itemColor = isSelected ? ColorsManager.primaryColor : context.textSecondaryColor;
+    final itemColor = isSelected
+        ? ColorsManager.primaryColor
+        : context.textSecondaryColor;
 
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
@@ -80,7 +90,9 @@ class _MainNavScreenState extends State<MainNavScreen> {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 2.h),
         decoration: BoxDecoration(
-          color: isSelected ? ColorsManager.primaryColor.withValues(alpha: 0.1) : Colors.transparent,
+          color: isSelected
+              ? ColorsManager.primaryColor.withValues(alpha: 0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(50.r),
         ),
         child: Column(
@@ -123,7 +135,6 @@ class _PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Center(
         child: Text(
           title.tr(),

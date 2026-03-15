@@ -12,17 +12,14 @@ import 'package:tavo/feature/booking/data/model/booking_status.dart';
 import 'package:tavo/feature/booking/ui/logic/bookings_cubit.dart';
 import 'package:tavo/feature/booking/ui/logic/bookings_state.dart';
 import 'package:tavo/feature/booking/ui/widgets/booking_card.dart';
+import 'package:tavo/feature/booking/ui/widgets/booking_details_sheet.dart';
 import 'package:tavo/feature/booking/ui/widgets/order_details_loading_sheet.dart';
-import 'package:tavo/feature/booking/ui/widgets/order_details_sheet.dart';
-import 'package:tavo/feature/profile/ui/widgets/profile_widgets.dart';
+import 'package:tavo/feature/Profile/ui/widgets/profile_widgets.dart';
 
 class BookingsScreen extends StatefulWidget {
   final bool showAppBar;
 
-  const BookingsScreen({
-    super.key,
-    this.showAppBar = true,
-  });
+  const BookingsScreen({super.key, this.showAppBar = true});
 
   @override
   State<BookingsScreen> createState() => _BookingsScreenState();
@@ -62,13 +59,16 @@ class _BookingsScreenState extends State<BookingsScreen>
               Expanded(
                 child: BlocConsumer<BookingsCubit, BookingsState>(
                   listener: (context, state) {
-                    if (state.orderDetails != null) {
+                    if (state.selectedBooking != null) {
                       Navigator.of(context).pop();
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
-                        builder: (_) => OrderDetailsSheet(order: state.orderDetails!),
+                        builder: (_) => BookingDetailsSheet(
+                          booking: state.selectedBooking!,
+                          order: state.orderDetails,
+                        ),
                       );
                       context.read<BookingsCubit>().clearDetails();
                     }
@@ -92,7 +92,9 @@ class _BookingsScreenState extends State<BookingsScreen>
                   builder: (context, state) {
                     if (state.loading) {
                       return const Center(
-                        child: CircularProgressIndicator(color: ColorsManager.primaryColor),
+                        child: CircularProgressIndicator(
+                          color: ColorsManager.primaryColor,
+                        ),
                       );
                     }
 
@@ -108,19 +110,22 @@ class _BookingsScreenState extends State<BookingsScreen>
                         _BookingsList(
                           items: state.filterBy(BookingStatus.inProgress),
                           locale: locale,
-                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onRefresh: () =>
+                              context.read<BookingsCubit>().refresh(),
                           onDetails: (id) => _onViewDetails(context, id),
                         ),
                         _BookingsList(
                           items: state.filterBy(BookingStatus.completed),
                           locale: locale,
-                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onRefresh: () =>
+                              context.read<BookingsCubit>().refresh(),
                           onDetails: (id) => _onViewDetails(context, id),
                         ),
                         _BookingsList(
                           items: state.filterBy(BookingStatus.cancelled),
                           locale: locale,
-                          onRefresh: () => context.read<BookingsCubit>().refresh(),
+                          onRefresh: () =>
+                              context.read<BookingsCubit>().refresh(),
                           onDetails: (id) => _onViewDetails(context, id),
                         ),
                       ],
@@ -141,7 +146,7 @@ class _BookingsScreenState extends State<BookingsScreen>
       backgroundColor: Colors.transparent,
       builder: (_) => const OrderDetailsLoadingSheet(),
     );
-    context.read<BookingsCubit>().loadOrderDetails(orderId);
+    context.read<BookingsCubit>().loadBookingDetails(orderId);
   }
 
   Widget _buildTabs(BuildContext context) {
@@ -160,13 +165,12 @@ class _BookingsScreenState extends State<BookingsScreen>
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: ColorsManager.black,
           unselectedLabelColor: ColorsManager.darkGray300,
-          labelStyle: TextStyles.font12DarkGray400Weight(context).copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-          unselectedLabelStyle:
-              TextStyles.font12DarkGray400Weight(context).copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          labelStyle: TextStyles.font12DarkGray400Weight(
+            context,
+          ).copyWith(fontWeight: FontWeight.w600),
+          unselectedLabelStyle: TextStyles.font12DarkGray400Weight(
+            context,
+          ).copyWith(fontWeight: FontWeight.w500),
           labelPadding: EdgeInsets.zero,
           indicator: BoxDecoration(
             color: ColorsManager.white,
@@ -189,7 +193,11 @@ class _BookingsScreenState extends State<BookingsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48.r, color: ColorsManager.darkGray300),
+            Icon(
+              Icons.error_outline,
+              size: 48.r,
+              color: ColorsManager.darkGray300,
+            ),
             SizedBox(height: 12.h),
             Text(
               error,
@@ -232,57 +240,67 @@ class _BookingsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 48.r,
-              color: ColorsManager.darkGray300,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              LocaleKeys.noBookings.tr(),
-              style: TextStyles.font14DarkGray400Weight(context).copyWith(
-                fontWeight: FontWeight.w600,
-                color: ColorsManager.darkGray300,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return RefreshIndicator(
       onRefresh: onRefresh,
       color: ColorsManager.primaryColor,
-      child: ListView.separated(
-        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        itemCount: items.length,
-        separatorBuilder: (_, __) => SizedBox(height: 12.h),
-        itemBuilder: (_, i) {
-          final b = items[i];
-          return BookingCard(
-            bookingId: b.orderNumber.isNotEmpty ? b.orderNumber : b.id,
-            restaurantName: b.getName(locale),
-            logoUrl: b.restaurantLogoUrl,
-            total: b.total,
-            address: b.address,
-            dateTimeText: b.dateTimeText,
-            seatsText: b.seatsText,
-            status: b.status,
-            onDetails: () => onDetails(b.id),
-            onDelete: () {},
-            onRate: () {},
-            onCancel: () {},
-          );
-        },
-      ),
+      child: items.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 48.r,
+                        color: ColorsManager.darkGray300,
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        LocaleKeys.noBookings.tr(),
+                        style: TextStyles.font14DarkGray400Weight(context)
+                            .copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: ColorsManager.darkGray300,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : ListView.separated(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => SizedBox(height: 12.h),
+              itemBuilder: (_, i) {
+                final b = items[i];
+                return BookingCard(
+                  bookingId: b.order?.orderNumber.isNotEmpty == true
+                      ? b.order!.orderNumber
+                      : b.id.substring(0, 8).toUpperCase(),
+                  restaurantName: b.getName(locale),
+                  logoUrl: b.restaurantLogoUrl,
+                  total: b.order?.totalPrice ?? 0,
+                  address: b.restaurantAddress,
+                  dateTimeText: b.getFormattedDate(locale),
+                  seatsText:
+                      '${b.guestsCount} ${locale == 'ar' ? 'ضيوف' : 'guests'}',
+                  status: b.bookingStatus,
+                  onDetails: () => onDetails(b.id),
+                  onDelete: () {},
+                  onRate: () {},
+                  onCancel: () {},
+                );
+              },
+            ),
     );
   }
 }

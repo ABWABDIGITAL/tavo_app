@@ -1,20 +1,19 @@
-// lib/feature/booking/ui/widgets/order_details_sheet.dart
-import 'package:cached_network_image/cached_network_image.dart';
+// lib/feature/booking/ui/widgets/booking_details_sheet.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:tavo/core/constants/app_assets.dart';
 import 'package:tavo/core/localization/locale_keys.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/core/theme/theme_extensions.dart';
+import 'package:tavo/feature/booking/data/model/booking_model.dart';
 import 'package:tavo/feature/booking/data/model/order_details_model.dart';
 
-class OrderDetailsSheet extends StatelessWidget {
-  final OrderDetailsModel order;
+class BookingDetailsSheet extends StatelessWidget {
+  final BookingModel booking;
+  final OrderDetailsModel? order;
 
-  const OrderDetailsSheet({super.key, required this.order});
+  const BookingDetailsSheet({super.key, required this.booking, this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +81,12 @@ class OrderDetailsSheet extends StatelessWidget {
                 children: [
                   _buildRestaurantInfo(context, locale),
                   SizedBox(height: 16.h),
-                  _buildOrderInfo(context, locale),
-                  SizedBox(height: 16.h),
-                  _buildItemsSection(context, locale),
-                  if (order.totalPrice > 0) ...[
+                  _buildBookingInfo(context, locale),
+                  if (order != null && order!.menuItems.isNotEmpty) ...[
+                    SizedBox(height: 16.h),
+                    _buildItemsSection(context, locale),
+                  ],
+                  if (order != null && order!.totalPrice > 0) ...[
                     SizedBox(height: 16.h),
                     _buildTotalSection(context),
                   ],
@@ -108,29 +109,33 @@ class OrderDetailsSheet extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: CachedNetworkImage(
-              imageUrl: order.restaurantLogo,
-              width: 50.r,
-              height: 50.r,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
-                width: 50.r,
-                height: 50.r,
-                color: ColorsManager.grey200,
-              ),
-              errorWidget: (_, __, ___) => Container(
-                width: 50.r,
-                height: 50.r,
-                color: ColorsManager.grey200,
-                child: Icon(
-                  Icons.restaurant,
-                  size: 24.r,
-                  color: ColorsManager.darkGray300,
-                ),
-              ),
+          Container(
+            width: 50.r,
+            height: 50.r,
+            decoration: BoxDecoration(
+              color: ColorsManager.grey200,
+              borderRadius: BorderRadius.circular(12.r),
             ),
+            child: booking.restaurantLogoUrl.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Image.network(
+                      booking.restaurantLogoUrl,
+                      width: 50.r,
+                      height: 50.r,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.restaurant,
+                        size: 24.r,
+                        color: ColorsManager.darkGray300,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.restaurant,
+                    size: 24.r,
+                    color: ColorsManager.darkGray300,
+                  ),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -138,7 +143,7 @@ class OrderDetailsSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  order.getRestaurantName(locale),
+                  booking.getName(locale),
                   style: TextStyle(
                     color: ColorsManager.black,
                     fontSize: 16.sp,
@@ -147,7 +152,7 @@ class OrderDetailsSheet extends StatelessWidget {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  order.formattedDate,
+                  booking.getFormattedDate(locale),
                   style: TextStyles.font12DarkGray400Weight(context),
                 ),
               ],
@@ -158,7 +163,7 @@ class OrderDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderInfo(BuildContext context, String locale) {
+  Widget _buildBookingInfo(BuildContext context, String locale) {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
@@ -170,9 +175,11 @@ class OrderDetailsSheet extends StatelessWidget {
         children: [
           _buildInfoRow(
             context,
-            icon: AppAssets.receipt,
-            label: LocaleKeys.bookingNumber.tr(),
-            value: order.orderNumber,
+            iconData: Icons.event_seat,
+            label: 'tables'.tr(),
+            value: booking.getTablesText().isNotEmpty
+                ? booking.getTablesText()
+                : '-',
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -181,8 +188,18 @@ class OrderDetailsSheet extends StatelessWidget {
           _buildInfoRow(
             context,
             iconData: Icons.access_time_rounded,
-            label: 'date'.tr(),
-            value: order.formattedDate,
+            label: 'time'.tr(),
+            value: booking.getTimeRange(locale),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 10.h),
+            child: Divider(height: 1, color: context.borderColor),
+          ),
+          _buildInfoRow(
+            context,
+            iconData: Icons.people_outline,
+            label: 'guests'.tr(),
+            value: '${booking.guestsCount}',
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -212,7 +229,7 @@ class OrderDetailsSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
-                  order.getStatusText(locale),
+                  booking.getStatusText(locale),
                   style: TextStyle(
                     color: _statusColor,
                     fontSize: 12.sp,
@@ -229,8 +246,7 @@ class OrderDetailsSheet extends StatelessWidget {
 
   Widget _buildInfoRow(
     BuildContext context, {
-    String? icon,
-    IconData? iconData,
+    required IconData iconData,
     required String label,
     required String value,
   }) {
@@ -243,19 +259,7 @@ class OrderDetailsSheet extends StatelessWidget {
             color: ColorsManager.primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: icon != null
-              ? Center(
-                  child: SvgPicture.asset(
-                    icon,
-                    width: 16.r,
-                    height: 16.r,
-                    colorFilter: const ColorFilter.mode(
-                      ColorsManager.primaryColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                )
-              : Icon(iconData, size: 16.r, color: ColorsManager.primaryColor),
+          child: Icon(iconData, size: 16.r, color: ColorsManager.primaryColor),
         ),
         SizedBox(width: 12.w),
         Text(label, style: TextStyles.font12DarkGray400Weight(context)),
@@ -278,7 +282,9 @@ class OrderDetailsSheet extends StatelessWidget {
   }
 
   Widget _buildItemsSection(BuildContext context, String locale) {
-    if (order.menuItems.isEmpty) return const SizedBox.shrink();
+    if (order == null || order!.menuItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,7 +298,9 @@ class OrderDetailsSheet extends StatelessWidget {
           ),
         ),
         SizedBox(height: 12.h),
-        ...order.menuItems.map((item) => _buildMenuItem(context, item, locale)),
+        ...order!.menuItems.map(
+          (item) => _buildMenuItem(context, item, locale),
+        ),
       ],
     );
   }
@@ -407,6 +415,8 @@ class OrderDetailsSheet extends StatelessWidget {
   }
 
   Widget _buildTotalSection(BuildContext context) {
+    if (order == null) return const SizedBox.shrink();
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -418,10 +428,10 @@ class OrderDetailsSheet extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildPriceRow(context, 'subtotal'.tr(), order.subtotal),
-          if (order.tax > 0) ...[
+          _buildPriceRow(context, LocaleKeys.subtotal.tr(), order!.subtotal),
+          if (order!.tax > 0) ...[
             SizedBox(height: 8.h),
-            _buildPriceRow(context, 'tax'.tr(), order.tax),
+            _buildPriceRow(context, LocaleKeys.tax.tr(), order!.tax),
           ],
           Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -430,7 +440,7 @@ class OrderDetailsSheet extends StatelessWidget {
           Row(
             children: [
               Text(
-                'total'.tr(),
+                LocaleKeys.total.tr(),
                 style: TextStyle(
                   color: ColorsManager.black,
                   fontSize: 16.sp,
@@ -439,7 +449,7 @@ class OrderDetailsSheet extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${order.totalPrice.toStringAsFixed(0)} ${LocaleKeys.currencySar.tr()}',
+                '${order!.totalPrice.toStringAsFixed(0)} ${LocaleKeys.currencySar.tr()}',
                 style: TextStyle(
                   color: ColorsManager.primaryColor,
                   fontSize: 18.sp,
@@ -471,26 +481,32 @@ class OrderDetailsSheet extends StatelessWidget {
   }
 
   Color get _statusColor {
-    switch (order.status) {
+    switch (booking.status) {
       case 'completed':
         return const Color(0xFF22A83A);
       case 'cancelled':
+      case 'no_show':
         return const Color(0xFFC62828);
       case 'confirmed':
         return const Color(0xFF1976D2);
+      case 'seated':
+        return const Color(0xFF2F2F5F);
       default:
         return const Color(0xFFFF9800);
     }
   }
 
   IconData get _statusIcon {
-    switch (order.status) {
+    switch (booking.status) {
       case 'completed':
         return Icons.check_circle_outline;
       case 'cancelled':
+      case 'no_show':
         return Icons.cancel_outlined;
       case 'confirmed':
         return Icons.verified_outlined;
+      case 'seated':
+        return Icons.event_seat_outlined;
       default:
         return Icons.hourglass_bottom_rounded;
     }

@@ -29,7 +29,7 @@ class AppAssets {
 
   // Home
   static const String headerBanner = 'assets/images/header_banner.png';
-  //notification 
+  //notification
   static const String icArrowRight = 'ic_arrow_right';
   static const String icCheck = 'ic_check';
   static const String icCancelCalendar = 'ic_cancel_calendar';
@@ -45,9 +45,10 @@ class AppAssets {
   static const String location = 'assets/icons/location.svg';
   static const String money = 'assets/icons/money.svg';
   static const String phone = 'assets/icons/phone.svg';
-  
+
   static const String mapsLocation = 'assets/icons/maps-location.svg';
   static const String chevronsLeft = 'assets/icons/chevrons-left.svg';
+
   /// Profile
   static const String user = 'assets/icons/user-square.svg';
   static const String bookings = 'assets/icons/calendar.svg';
@@ -68,18 +69,12 @@ class AppAssets {
   static const String contact = 'assets/icons/contact.svg';
   static const String headphone = 'assets/icons/headphone.svg';
   static const String bell = 'assets/icons/bell.svg';
-static const String messageQuestion='assets/icons/message-question.svg';
+  static const String chart = 'assets/icons/chart.svg';
+  static const String messageQuestion = 'assets/icons/message-question.svg';
 
-static const String arrowLeft = 'assets/icons/arrow-left.svg';
+  static const String arrowLeft = 'assets/icons/arrow-left.svg';
 
-static const String checkCircle = 'assets/icons/check-circle.svg';
-static const String orderSuccess = 'assets/icons/order_success.svg';
-static const String receipt = 'assets/icons/receipt.svg';
-
- 
-
-  
-  
-  
-  
+  static const String checkCircle = 'assets/icons/check-circle.svg';
+  static const String orderSuccess = 'assets/icons/order_success.svg';
+  static const String receipt = 'assets/icons/receipt.svg';
 }

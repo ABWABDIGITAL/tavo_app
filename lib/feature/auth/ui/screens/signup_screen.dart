@@ -42,7 +42,7 @@ class _SignupScreenContentState extends State<_SignupScreenContent> {
   final _emailController = TextEditingController();
   final _locationController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final String _countryCode = '+965';
+  final String _countryCode = '+966';
   LatLng? _selectedLocation;
 
   @override

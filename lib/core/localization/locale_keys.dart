@@ -20,6 +20,7 @@ abstract class LocaleKeys {
   static const currencySar = 'currency_sar';
   static const today = 'today';
   static const yesterday = 'yesterday';
+  static const done = 'done';
 
   // ============== Profile Screen ==============
   static const profile = 'profile';
@@ -58,6 +59,20 @@ abstract class LocaleKeys {
   static const pleaseEnterPhone = 'please_enter_phone';
   static const saveChanges = 'save_changes';
   static const profileUpdatedSuccessfully = 'profile_updated_successfully';
+  static const selectImageSource = 'select_image_source';
+  static const camera = 'camera';
+  static const gallery = 'gallery';
+
+  // ============== Stats Screen ==============
+  static const myStats = 'my_stats';
+  static const totalReservations = 'total_reservations';
+  static const totalOrders = 'total_orders';
+  static const totalSpent = 'total_spent';
+  static const currency = 'currency';
+  static const loyaltyPoints = 'loyalty_points';
+  static const currentPoints = 'current_points';
+  static const tier = 'tier';
+  static const lifetimePoints = 'lifetime_points';
 
   // ============== Notifications Screen ==============
   static const markAllAsRead = 'mark_all_as_read';
@@ -73,6 +88,40 @@ abstract class LocaleKeys {
   static const rate = 'rate';
   static const cancelBooking = 'cancel_booking';
   static const seatsReserved = 'seats_reserved';
+  static const subtotal = 'subtotal';
+  static const tax = 'tax';
+  static const total = 'total';
+  static const orderItems = 'order_items';
+  static const bookTable = 'book_table';
+  static const selectDate = 'select_date';
+  static const selectTime = 'select_time';
+  static const numberOfGuests = 'number_of_guests';
+  static const guests = 'guests';
+  static const selectTables = 'select_tables';
+  static const selectDateAndTime = 'select_date_and_time';
+  static const selectDateTimeFirst = 'select_date_time_first';
+  static const noTablesAvailable = 'no_tables_available';
+  static const notEnoughSeats = 'not_enough_seats';
+  static const checkAvailability = 'check_availability';
+  static const confirmBooking = 'confirm_booking';
+  static const bookingCreated = 'booking_created';
+  static const available = 'available';
+  static const unavailable = 'unavailable';
+  static const selected = 'selected';
+  static const seats = 'seats';
+  static const time = 'time';
+  static const tables = 'tables';
+  static const selectYourTable = 'select_your_table';
+  static const tapToSelectTable = 'tap_to_select_table';
+  static const checkingAvailability = 'checking_availability';
+  static const next = 'next';
+  static const back = 'back';
+  static const bookingSummary = 'booking_summary';
+  static const table = 'table';
+  static const capacity = 'capacity';
+  static const date = 'date';
+  static const orderWillBeLinked = 'order_will_be_linked';
+  static const yourTableReserved = 'your_table_reserved';
 
   // ============== Language Screen ==============
   static const selectLanguage = 'select_language';
@@ -145,11 +194,13 @@ abstract class LocaleKeys {
   static const acceptTerms = 'accept_terms';
   static const acceptTermsContent = 'accept_terms_content';
   static const accountAndRegistration = 'account_and_registration';
-  static const accountAndRegistrationContent = 'account_and_registration_content';
+  static const accountAndRegistrationContent =
+      'account_and_registration_content';
   static const bookingsTerms = 'bookings_terms';
   static const bookingsTermsContent = 'bookings_terms_content';
   static const cancellationAndModification = 'cancellation_and_modification';
-  static const cancellationAndModificationContent = 'cancellation_and_modification_content';
+  static const cancellationAndModificationContent =
+      'cancellation_and_modification_content';
   static const contentAndReviews = 'content_and_reviews';
   static const contentAndReviewsContent = 'content_and_reviews_content';
   static const intellectualProperty = 'intellectual_property';

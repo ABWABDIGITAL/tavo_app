@@ -1,4 +1,4 @@
-// lib/feature/profile/ui/screens/profile_screen.dart
+// lib/feature/Profile/ui/screens/profile_screen.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -12,18 +12,19 @@ import 'package:tavo/core/localization/locale_keys.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/core/theme/text_styles.dart';
 import 'package:tavo/core/theme/theme_extensions.dart';
-import 'package:tavo/feature/profile/ui/logic/cubit/profile_cubit.dart';
-import 'package:tavo/feature/profile/ui/logic/cubit/profile_state.dart';
+import 'package:tavo/feature/Profile/ui/logic/cubit/profile_cubit.dart';
+import 'package:tavo/feature/Profile/ui/logic/cubit/profile_state.dart';
 import 'package:tavo/feature/auth/ui/screens/login_screen.dart';
 import 'package:tavo/feature/booking/ui/screens/bookings_screen.dart';
 import 'package:tavo/feature/notifications/ui/screens/notifications_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/about_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/contact_us_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/help_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/language_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/personal_info_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/privacy_policy_screen.dart';
-import 'package:tavo/feature/profile/ui/screens/terms_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/about_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/contact_us_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/help_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/language_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/personal_info_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/privacy_policy_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/stats_screen.dart';
+import 'package:tavo/feature/Profile/ui/screens/terms_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -43,7 +44,6 @@ class _ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           return CustomScrollView(
@@ -51,8 +51,6 @@ class _ProfileView extends StatelessWidget {
             slivers: [
               SliverToBoxAdapter(child: _buildHeader(context, state)),
               SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-              // SliverToBoxAdapter(child: _buildStatsRow(context, state)),
-              // SliverToBoxAdapter(child: SizedBox(height: 20.h)),
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 sliver: SliverToBoxAdapter(
@@ -66,18 +64,31 @@ class _ProfileView extends StatelessWidget {
                           _MenuItem(
                             title: LocaleKeys.personalInfo.tr(),
                             icon: AppAssets.user,
-                            onTap: () => _navigateTo(context, const PersonalInfoScreen()),
+                            onTap: () => _navigateTo(
+                              context,
+                              const PersonalInfoScreen(),
+                            ),
+                          ),
+                          _MenuItem(
+                            title: LocaleKeys.myStats.tr(),
+                            icon: AppAssets.chart,
+                            onTap: () =>
+                                _navigateTo(context, const StatsScreen()),
                           ),
                           _MenuItem(
                             title: LocaleKeys.bookings.tr(),
                             icon: AppAssets.bookings,
-                            onTap: () => _navigateTo(context, const BookingsScreen()),
+                            onTap: () =>
+                                _navigateTo(context, const BookingsScreen()),
                           ),
                           _MenuItem(
                             title: LocaleKeys.notifications.tr(),
                             icon: AppAssets.notification,
                             badge: '3',
-                            onTap: () => _navigateTo(context, const NotificationsScreen()),
+                            onTap: () => _navigateTo(
+                              context,
+                              const NotificationsScreen(),
+                            ),
                           ),
                         ],
                       ),
@@ -89,8 +100,9 @@ class _ProfileView extends StatelessWidget {
                           _MenuItem(
                             title: LocaleKeys.language.tr(),
                             icon: AppAssets.language,
-                            trailing: _LanguageBadge(),
-                            onTap: () => _navigateTo(context, const LanguageScreen()),
+                            trailing: const _LanguageBadge(),
+                            onTap: () =>
+                                _navigateTo(context, const LanguageScreen()),
                           ),
                         ],
                       ),
@@ -102,12 +114,14 @@ class _ProfileView extends StatelessWidget {
                           _MenuItem(
                             title: LocaleKeys.helpAndFaq.tr(),
                             icon: AppAssets.messageQuestion,
-                            onTap: () => _navigateTo(context, const HelpScreen()),
+                            onTap: () =>
+                                _navigateTo(context, const HelpScreen()),
                           ),
                           _MenuItem(
                             title: LocaleKeys.contactUs.tr(),
                             icon: AppAssets.headphone,
-                            onTap: () => _navigateTo(context, const ContactUsScreen()),
+                            onTap: () =>
+                                _navigateTo(context, const ContactUsScreen()),
                           ),
                         ],
                       ),
@@ -119,17 +133,22 @@ class _ProfileView extends StatelessWidget {
                           _MenuItem(
                             title: LocaleKeys.privacyPolicy.tr(),
                             icon: AppAssets.shield,
-                            onTap: () => _navigateTo(context, const PrivacyPolicyScreen()),
+                            onTap: () => _navigateTo(
+                              context,
+                              const PrivacyPolicyScreen(),
+                            ),
                           ),
                           _MenuItem(
                             title: LocaleKeys.termsAndConditions.tr(),
                             icon: AppAssets.document,
-                            onTap: () => _navigateTo(context, const TermsScreen()),
+                            onTap: () =>
+                                _navigateTo(context, const TermsScreen()),
                           ),
                           _MenuItem(
                             title: LocaleKeys.aboutApp.tr(),
                             icon: AppAssets.info,
-                            onTap: () => _navigateTo(context, const AboutScreen()),
+                            onTap: () =>
+                                _navigateTo(context, const AboutScreen()),
                           ),
                         ],
                       ),
@@ -141,9 +160,9 @@ class _ProfileView extends StatelessWidget {
                       Center(
                         child: Text(
                           'Tavo v1.0.0',
-                          style: TextStyles.font10DarkGray400Weight(context).copyWith(
-                            color: ColorsManager.darkGray300,
-                          ),
+                          style: TextStyles.font10DarkGray400Weight(
+                            context,
+                          ).copyWith(color: ColorsManager.darkGray300),
                         ),
                       ),
                       SizedBox(height: 20.h),
@@ -166,11 +185,15 @@ class _ProfileView extends StatelessWidget {
         children: [
           Container(
             height: 150.h,
-            
             width: double.infinity,
             decoration: BoxDecoration(
-              image: DecorationImage(image: AssetImage(AppAssets.headerHome),fit: BoxFit.cover),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
+              image: DecorationImage(
+                image: AssetImage(AppAssets.headerHome),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(28.r),
+              ),
             ),
             child: Stack(
               children: [
@@ -244,19 +267,20 @@ class _ProfileView extends StatelessWidget {
                         children: [
                           Text(
                             state.user?.name ?? '',
-                            style: TextStyles.font14DarkGray400Weight(context).copyWith(
-                              color: ColorsManager.black,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16.sp,
-                            ),
+                            style: TextStyles.font14DarkGray400Weight(context)
+                                .copyWith(
+                                  color: ColorsManager.black,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16.sp,
+                                ),
                           ),
                           SizedBox(height: 4.h),
                           if (state.user?.phone != null)
                             Text(
                               state.user!.phone!,
-                              style: TextStyles.font12DarkGray400Weight(context).copyWith(
-                                color: ColorsManager.darkGray300,
-                              ),
+                              style: TextStyles.font12DarkGray400Weight(
+                                context,
+                              ).copyWith(color: ColorsManager.darkGray300),
                             ),
                         ],
                       ),
@@ -269,10 +293,14 @@ class _ProfileView extends StatelessWidget {
   }
 
   Widget _buildAvatar(ProfileState state, double size) {
-    if (state.user?.image != null && state.user!.image!.isNotEmpty) {
+    final imageUrl = state.user?.image;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      String fullUrl = imageUrl.startsWith('http')
+          ? imageUrl
+          : 'http://46.202.134.87:4321$imageUrl';
       return ClipOval(
         child: CachedNetworkImage(
-          imageUrl: state.user!.image!,
+          imageUrl: fullUrl,
           width: size.r,
           height: size.r,
           fit: BoxFit.cover,
@@ -280,13 +308,21 @@ class _ProfileView extends StatelessWidget {
             width: size.r,
             height: size.r,
             color: ColorsManager.grey200,
-            child: Icon(Icons.person, size: (size / 2).r, color: ColorsManager.darkGray300),
+            child: Icon(
+              Icons.person,
+              size: (size / 2).r,
+              color: ColorsManager.darkGray300,
+            ),
           ),
           errorWidget: (_, __, ___) => Container(
             width: size.r,
             height: size.r,
             color: ColorsManager.grey200,
-            child: Icon(Icons.person, size: (size / 2).r, color: ColorsManager.darkGray300),
+            child: Icon(
+              Icons.person,
+              size: (size / 2).r,
+              color: ColorsManager.darkGray300,
+            ),
           ),
         ),
       );
@@ -298,7 +334,11 @@ class _ProfileView extends StatelessWidget {
         color: ColorsManager.grey200,
         shape: BoxShape.circle,
       ),
-      child: Icon(Icons.person, size: (size / 2).r, color: ColorsManager.darkGray300),
+      child: Icon(
+        Icons.person,
+        size: (size / 2).r,
+        color: ColorsManager.darkGray300,
+      ),
     );
   }
 
@@ -323,54 +363,6 @@ class _ProfileView extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatsRow(BuildContext context, ProfileState state) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        decoration: BoxDecoration(
-          color: ColorsManager.white,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: context.borderColor),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _StatItem(
-                value: '12',
-                label: LocaleKeys.booking.tr(),
-                color: ColorsManager.primaryColor,
-              ),
-            ),
-            Container(width: 1, height: 36.h, color: context.borderColor),
-            Expanded(
-              child: _StatItem(
-                value: '4',
-                label: LocaleKeys.favorite.tr(),
-                color: const Color(0xFFE91E63),
-              ),
-            ),
-            Container(width: 1, height: 36.h, color: context.borderColor),
-            Expanded(
-              child: _StatItem(
-                value: '8',
-                label: LocaleKeys.review.tr(),
-                color: const Color(0xFFFF9800),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -425,9 +417,9 @@ class _ProfileView extends StatelessWidget {
   }
 
   void _navigateTo(BuildContext context, Widget screen) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => screen))
-        .then((_) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen)).then((
+      _,
+    ) {
       if (context.mounted) {
         context.read<ProfileCubit>().loadProfile();
       }
@@ -457,41 +449,6 @@ class _ProfileView extends StatelessWidget {
   }
 }
 
-class _StatItem extends StatelessWidget {
-  final String value;
-  final String label;
-  final Color color;
-
-  const _StatItem({
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w800,
-            color: color,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          label,
-          style: TextStyles.font10DarkGray400Weight(context).copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SectionTitle extends StatelessWidget {
   final String title;
 
@@ -501,10 +458,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsetsDirectional.only(start: 4.w),
-      child: Text(
-        title,
-        style: TextStyles.font16Black500Weight(context)
-      ),
+      child: Text(title, style: TextStyles.font16Black500Weight(context)),
     );
   }
 }
@@ -537,7 +491,6 @@ class _MenuCard extends StatelessWidget {
         color: ColorsManager.white,
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: context.borderColor),
-       
       ),
       child: Column(
         children: List.generate(items.length, (index) {
@@ -555,7 +508,10 @@ class _MenuCard extends StatelessWidget {
                     bottom: isLast ? Radius.circular(18.r) : Radius.zero,
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 14.h,
+                    ),
                     child: Row(
                       children: [
                         Container(
@@ -581,16 +537,20 @@ class _MenuCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             item.title,
-                            style: TextStyles.font12DarkGray400Weight(context).copyWith(
-                              color: ColorsManager.black,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13.sp,
-                            ),
+                            style: TextStyles.font12DarkGray400Weight(context)
+                                .copyWith(
+                                  color: ColorsManager.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13.sp,
+                                ),
                           ),
                         ),
                         if (item.badge != null) ...[
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 3.h,
+                            ),
                             decoration: BoxDecoration(
                               color: ColorsManager.primaryColor,
                               borderRadius: BorderRadius.circular(10.r),
@@ -610,7 +570,11 @@ class _MenuCard extends StatelessWidget {
                           item.trailing!,
                           SizedBox(width: 8.w),
                         ],
-                        Icon(Icons.arrow_forward_ios,size: 15.r,color: ColorsManager.darkGray300,)
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 15.r,
+                          color: ColorsManager.darkGray300,
+                        ),
                       ],
                     ),
                   ),
@@ -769,10 +733,9 @@ class _ConfirmSheet extends StatelessWidget {
             SizedBox(height: 8.h),
             Text(
               message,
-              style: TextStyles.font12DarkGray400Weight(context).copyWith(
-                fontWeight: FontWeight.w500,
-                height: 1.6,
-              ),
+              style: TextStyles.font12DarkGray400Weight(
+                context,
+              ).copyWith(fontWeight: FontWeight.w500, height: 1.6),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20.h),

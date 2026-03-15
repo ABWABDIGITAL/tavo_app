@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tavo/core/cache/cache_helper.dart';
 import 'package:tavo/core/network/api_constants.dart';
 import 'package:tavo/core/network/api_service.dart';
 import '../models/auth_response.dart';
 import '../models/register_request.dart';
 
-import '../models/verify_otp_request.dart' ;
+import '../models/verify_otp_request.dart';
 import '../models/login_request.dart';
 
 class AuthRepo {
@@ -59,6 +58,17 @@ class AuthRepo {
       }
       if (authResponse.user != null) {
         await CacheHelper.setUser(jsonEncode(authResponse.user!.toJson()));
+        if (authResponse.user!.id != null &&
+            authResponse.user!.id!.isNotEmpty) {
+          await CacheHelper.setUserId(authResponse.user!.id!);
+        }
+        if (authResponse.user!.name != null &&
+            authResponse.user!.name!.isNotEmpty) {
+          await CacheHelper.setUserName(authResponse.user!.name!);
+        }
+        if (authResponse.user!.phone != null) {
+          await CacheHelper.setPhone(authResponse.user!.phone!);
+        }
       }
       return authResponse;
     } on DioException catch (e) {
@@ -88,15 +98,15 @@ class AuthRepo {
   String _handleDioError(DioException e) {
     if (e.response?.data != null) {
       final data = e.response?.data;
-      
+
       if (data is String && data.contains('<!DOCTYPE html>')) {
         return 'API endpoint not found';
       }
-      
+
       if (data is String) {
         return data;
       }
-      
+
       if (data is Map<String, dynamic>) {
         if (data['errors'] != null && data['errors'] is List) {
           final errors = data['errors'] as List;
@@ -109,7 +119,7 @@ class AuthRepo {
             'Something went wrong';
       }
     }
-    
+
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:

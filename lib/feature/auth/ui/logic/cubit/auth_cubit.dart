@@ -14,7 +14,7 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit(this._authRepo) : super(AuthInitial());
 
   String _phone = '';
-  String _countryCode = '+965';
+  String _countryCode = '+966';
 
   String get phone => _phone;
   String get countryCode => _countryCode;

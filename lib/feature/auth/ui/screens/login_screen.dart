@@ -38,7 +38,7 @@ class _LoginScreenContent extends StatefulWidget {
 class _LoginScreenContentState extends State<_LoginScreenContent> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final String _countryCode = '+965';
+  final String _countryCode = '+966';
 
   @override
   void dispose() {
