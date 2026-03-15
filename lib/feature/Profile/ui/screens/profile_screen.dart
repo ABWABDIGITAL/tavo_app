@@ -17,6 +17,8 @@ import 'package:tavo/feature/Profile/ui/logic/cubit/profile_state.dart';
 import 'package:tavo/feature/auth/ui/screens/login_screen.dart';
 import 'package:tavo/feature/booking/ui/screens/bookings_screen.dart';
 import 'package:tavo/feature/notifications/ui/screens/notifications_screen.dart';
+import 'package:tavo/feature/notifications/ui/logic/notifications_cubit.dart';
+import 'package:tavo/feature/notifications/ui/logic/notifications_state.dart';
 import 'package:tavo/feature/Profile/ui/screens/about_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/contact_us_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/help_screen.dart';
@@ -31,8 +33,15 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<ProfileCubit>()..loadProfile(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<ProfileCubit>()..loadProfile()),
+        BlocProvider(
+          create: (_) =>
+              getIt<NotificationsCubit>()
+                ..loadNotifications(context.locale.languageCode),
+        ),
+      ],
       child: const _ProfileView(),
     );
   }
@@ -70,10 +79,45 @@ class _ProfileView extends StatelessWidget {
                             ),
                           ),
                           _MenuItem(
-                            title: LocaleKeys.myStats.tr(),
-                            icon: AppAssets.chart,
-                            onTap: () =>
-                                _navigateTo(context, const StatsScreen()),
+                            title: LocaleKeys.notifications.tr(),
+                            icon: AppAssets.notification,
+                            badge:
+                                BlocBuilder<
+                                  NotificationsCubit,
+                                  NotificationsState
+                                >(
+                                  builder: (context, state) {
+                                    if (state.unreadCount > 0) {
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 3.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: ColorsManager.primaryColor,
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          state.unreadCount > 99
+                                              ? '99+'
+                                              : '${state.unreadCount}',
+                                          style: TextStyle(
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: ColorsManager.white,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const SizedBox();
+                                  },
+                                ),
+                            onTap: () => _navigateTo(
+                              context,
+                              const NotificationsScreen(),
+                            ),
                           ),
                           _MenuItem(
                             title: LocaleKeys.bookings.tr(),
@@ -84,7 +128,39 @@ class _ProfileView extends StatelessWidget {
                           _MenuItem(
                             title: LocaleKeys.notifications.tr(),
                             icon: AppAssets.notification,
-                            badge: '3',
+                            badge:
+                                BlocBuilder<
+                                  NotificationsCubit,
+                                  NotificationsState
+                                >(
+                                  builder: (context, state) {
+                                    if (state.unreadCount > 0) {
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 3.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: ColorsManager.primaryColor,
+                                          borderRadius: BorderRadius.circular(
+                                            10.r,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          state.unreadCount > 99
+                                              ? '99+'
+                                              : '${state.unreadCount}',
+                                          style: TextStyle(
+                                            fontSize: 10.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: ColorsManager.white,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const SizedBox();
+                                  },
+                                ),
                             onTap: () => _navigateTo(
                               context,
                               const NotificationsScreen(),
@@ -468,7 +544,7 @@ class _MenuItem {
   final String icon;
   final VoidCallback onTap;
   final Widget? trailing;
-  final String? badge;
+  final Widget? badge;
 
   const _MenuItem({
     required this.title,
@@ -546,24 +622,7 @@ class _MenuCard extends StatelessWidget {
                           ),
                         ),
                         if (item.badge != null) ...[
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.w,
-                              vertical: 3.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ColorsManager.primaryColor,
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            child: Text(
-                              item.badge!,
-                              style: TextStyle(
-                                color: ColorsManager.white,
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+                          item.badge!,
                           SizedBox(width: 8.w),
                         ],
                         if (item.trailing != null) ...[

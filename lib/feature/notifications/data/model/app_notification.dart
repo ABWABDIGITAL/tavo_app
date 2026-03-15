@@ -7,6 +7,8 @@ class AppNotification {
   final bool isRead;
   final String type;
   final DateTime createdAt;
+  final String? relatedId;
+  final String? relatedModel;
 
   AppNotification({
     required this.id,
@@ -16,15 +18,20 @@ class AppNotification {
     required this.isRead,
     this.type = '',
     DateTime? createdAt,
+    this.relatedId,
+    this.relatedModel,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory AppNotification.fromJson(Map<String, dynamic> json, String locale) {
     final titleMap = json['title'] as Map<String, dynamic>? ?? {};
     final messageMap = json['message'] as Map<String, dynamic>? ?? {};
-    final createdAt = DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now();
+    final createdAt =
+        DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now();
 
-    String rawTitle = titleMap[locale]?.toString() ?? titleMap['ar']?.toString() ?? '';
-    String rawMessage = messageMap[locale]?.toString() ?? messageMap['ar']?.toString() ?? '';
+    String rawTitle =
+        titleMap[locale]?.toString() ?? titleMap['ar']?.toString() ?? '';
+    String rawMessage =
+        messageMap[locale]?.toString() ?? messageMap['ar']?.toString() ?? '';
 
     rawTitle = _cleanTemplateString(rawTitle);
     rawMessage = _cleanTemplateString(rawMessage);
@@ -37,8 +44,13 @@ class AppNotification {
       isRead: json['isRead'] ?? false,
       type: json['type'] ?? '',
       createdAt: createdAt,
+      relatedId: json['relatedId']?.toString(),
+      relatedModel: json['relatedModel']?.toString(),
     );
   }
+
+  bool get isReservation => type.startsWith('reservation');
+  bool get isOrder => type.startsWith('order');
 
   static String _cleanTemplateString(String text) {
     if (text.isEmpty) return text;
@@ -47,7 +59,9 @@ class AppNotification {
       final backtickStart = text.indexOf('`');
       final backtickEnd = text.lastIndexOf('`');
 
-      if (backtickStart != -1 && backtickEnd != -1 && backtickEnd > backtickStart) {
+      if (backtickStart != -1 &&
+          backtickEnd != -1 &&
+          backtickEnd > backtickStart) {
         text = text.substring(backtickStart + 1, backtickEnd);
       } else {
         final arrowIndex = text.indexOf('=>');
@@ -58,20 +72,17 @@ class AppNotification {
       }
     }
 
-    text = text.replaceAllMapped(
-      RegExp(r'\{\{(\w+)\}\}'),
-      (match) {
-        final key = match.group(1) ?? '';
-        switch (key) {
-          case 'orderNumber':
-            return '#---';
-          case 'restaurantName':
-            return '';
-          default:
-            return '';
-        }
-      },
-    );
+    text = text.replaceAllMapped(RegExp(r'\{\{(\w+)\}\}'), (match) {
+      final key = match.group(1) ?? '';
+      switch (key) {
+        case 'orderNumber':
+          return '#---';
+        case 'restaurantName':
+          return '';
+        default:
+          return '';
+      }
+    });
 
     text = text.replaceAll(RegExp(r'\s+'), ' ').trim();
 
@@ -80,12 +91,16 @@ class AppNotification {
 
   bool get isToday {
     final now = DateTime.now();
-    return createdAt.year == now.year && createdAt.month == now.month && createdAt.day == now.day;
+    return createdAt.year == now.year &&
+        createdAt.month == now.month &&
+        createdAt.day == now.day;
   }
 
   bool get isYesterday {
     final y = DateTime.now().subtract(const Duration(days: 1));
-    return createdAt.year == y.year && createdAt.month == y.month && createdAt.day == y.day;
+    return createdAt.year == y.year &&
+        createdAt.month == y.month &&
+        createdAt.day == y.day;
   }
 
   bool get isOlder => !isToday && !isYesterday;
@@ -99,6 +114,8 @@ class AppNotification {
       isRead: isRead ?? this.isRead,
       type: type,
       createdAt: createdAt,
+      relatedId: relatedId,
+      relatedModel: relatedModel,
     );
   }
 

@@ -1,10 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tavo/core/constants/app_assets.dart';
+import 'package:tavo/core/di/service_locator.dart';
 import 'package:tavo/core/theme/colors.dart';
 import 'package:tavo/feature/notifications/ui/screens/notifications_screen.dart';
+import 'package:tavo/feature/notifications/ui/logic/notifications_cubit.dart';
+import 'package:tavo/feature/notifications/ui/logic/notifications_state.dart';
 
 class HomeHeader extends StatelessWidget {
   final double shrinkOffset;
@@ -65,37 +69,86 @@ class HomeHeader extends StatelessWidget {
                     ),
                   ),
                   // Notification icon
-                  Container(
-                    width: 40.w,
-                    height: 40.w,
-                    decoration: BoxDecoration(
-                      color: ColorsManager.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
+                  BlocProvider(
+                    create: (_) =>
+                        getIt<NotificationsCubit>()
+                          ..loadNotifications(context.locale.languageCode),
+                    child: BlocBuilder<NotificationsCubit, NotificationsState>(
+                      builder: (context, state) {
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.w,
+                              decoration: BoxDecoration(
+                                color: ColorsManager.white.withValues(
+                                  alpha: 0.15,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const NotificationsScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: SvgPicture.asset(
+                                    AppAssets.notification,
+                                    width: 20.w,
+                                    height: 20.w,
+                                    colorFilter: const ColorFilter.mode(
+                                      ColorsManager.white,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (state.unreadCount > 0)
+                              Positioned(
+                                right: -2,
+                                top: -2,
+                                child: Container(
+                                  padding: EdgeInsets.all(4.r),
+                                  decoration: const BoxDecoration(
+                                    color: ColorsManager.secondary500,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 18.r,
+                                    minHeight: 18.r,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      state.unreadCount > 99
+                                          ? '99+'
+                                          : '${state.unreadCount}',
+                                      style: TextStyle(
+                                        color: ColorsManager.white,
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
-                    child: Center(
-                      child: 
-                      InkWell(
-                        onTap: () {
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
-                        },
-                        child: SvgPicture.asset(
-                        AppAssets.notification,
-                        width: 20.w,
-                        height: 20.w,
-                        colorFilter: const ColorFilter.mode(
-                          ColorsManager.white,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),)
+                  ),
                 ],
               ),
               SizedBox(height: 16.h),
               // Search bar
               Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 16.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: ColorsManager.white,
                   borderRadius: BorderRadius.circular(50.r),
