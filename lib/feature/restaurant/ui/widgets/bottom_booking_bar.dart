@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,39 +43,48 @@ class BottomBookingBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasCart = cartLines.isNotEmpty;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        border: Border(top: BorderSide(color: context.borderColor)),
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(16.r),
+        topRight: Radius.circular(16.r),
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (hasCart) ...[
-                _MiniCartStrip(
-                  lines: cartLines,
-                  onAddItem: onAddItem,
-                  onRemoveItem: onRemoveItem,
-                ),
-                SizedBox(height: 10.h),
-              ],
-              hasCart
-                  ? _BookWithTotalOneContainer(
-                      context: context,
-                      total: total,
-                      onPressed: onPressed,
-                      buttonTextKey: buttonTextKey,
-                    )
-                  : _BookOnlyButton(
-                      context: context,
-                      onPressed: onPressed,
-                      buttonTextKey: buttonTextKey,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0,), 
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border(top: BorderSide(color: context.borderColor)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasCart) ...[
+                    _MiniCartStrip(
+                      lines: cartLines,
+                      onAddItem: onAddItem,
+                      onRemoveItem: onRemoveItem,
                     ),
-            ],
+                    SizedBox(height: 10.h),
+                  ],
+                  hasCart
+                      ? _BookWithTotalOneContainer(
+                          context: context,
+                          total: total,
+                          onPressed: onPressed,
+                          buttonTextKey: buttonTextKey,
+                        )
+                      : _BookOnlyButton(
+                          context: context,
+                          onPressed: onPressed,
+                          buttonTextKey: buttonTextKey,
+                        ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -207,31 +218,37 @@ class _MiniCartStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.RTL;
 
-    return Container(
-      height: 92.h,
-      padding: EdgeInsets.all(10.r),
-      decoration: BoxDecoration(
-        color: ColorsManager.white,
-        borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: ColorsManager.grey100),
-      ),
-      child: Align(
-        alignment: isRtl ? Alignment.centerRight : Alignment.centerLeft,
-        child: SizedBox(
-          height: 74.h,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            reverse: isRtl,
-            itemCount: lines.length,
-            separatorBuilder: (_, __) => SizedBox(width: 10.w),
-            itemBuilder: (_, i) {
-              final line = lines[i];
-              return _MiniCartItem(
-                line: line,
-                onAdd: onAddItem == null ? null : () => onAddItem!(line.id),
-                onRemove: onRemoveItem == null ? null : () => onRemoveItem!(line.id),
-              );
-            },
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22.r),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          height: 92.h,
+          padding: EdgeInsets.all(10.r),
+          decoration: BoxDecoration(
+            color: ColorsManager.transparent,
+            borderRadius: BorderRadius.circular(22.r),
+            border: Border.all(color: ColorsManager.grey100),
+          ),
+          child: Align(
+            alignment: isRtl ? Alignment.centerRight : Alignment.centerLeft,
+            child: SizedBox(
+              height: 74.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                reverse: isRtl,
+                itemCount: lines.length,
+                separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                itemBuilder: (_, i) {
+                  final line = lines[i];
+                  return _MiniCartItem(
+                    line: line,
+                    onAdd: onAddItem == null ? null : () => onAddItem!(line.id),
+                    onRemove: onRemoveItem == null ? null : () => onRemoveItem!(line.id),
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),

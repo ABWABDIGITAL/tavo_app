@@ -57,12 +57,6 @@ class MenuItemCard extends StatelessWidget {
             ),
           ),
 
-          // Overlay
-          Positioned.fill(
-            child: Container(
-              color: ColorsManager.black.withOpacity(0.18),
-            ),
-          ),
 
           // ✅ Customize Button - ONLY this opens customization screen
           if (item.hasDiscount || onCustomize != null)
@@ -72,7 +66,7 @@ class MenuItemCard extends StatelessWidget {
               child: GestureDetector(
                 onTap: onCustomize,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: ColorsManager.secondaryColor,
                     borderRadius: BorderRadius.circular(22.r),
@@ -82,8 +76,8 @@ class MenuItemCard extends StatelessWidget {
                     children: [
                       SvgPicture.asset(
                         AppAssets.edit,
-                        width: 14.r,
-                        height: 14.r,
+                        width: 12.r,
+                        height: 12.r,
                         colorFilter: const ColorFilter.mode(
                           ColorsManager.white,
                           BlendMode.srcIn,
@@ -92,8 +86,10 @@ class MenuItemCard extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Text(
                         'customize'.tr(),
+
                         style: TextStyles.font14White400Weight(context).copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10.sp,
                         ),
                       ),
                     ],
@@ -109,7 +105,13 @@ class MenuItemCard extends StatelessWidget {
             end: 0,
             child: Container(
               padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
-              color: ColorsManager.black.withOpacity(0.35),
+              decoration: BoxDecoration(
+                color: ColorsManager.black.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(18.r),
+                  bottomRight: Radius.circular(18.r),
+                ),
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -119,10 +121,11 @@ class MenuItemCard extends StatelessWidget {
                       children: [
                         Text(
                           item.getTitle(locale),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyles.font16White500Weight(context).copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
                           ),
                         ),
                         SizedBox(height: 6.h),
@@ -132,7 +135,8 @@ class MenuItemCard extends StatelessWidget {
                               child: Text(
                                 '${item.price.toStringAsFixed(0)} ${'currency'.tr()}',
                                 style: TextStyles.font14White500Weight(context).copyWith(
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                             ),
@@ -161,8 +165,8 @@ class MenuItemCard extends StatelessWidget {
                       onTap: onRemove,
                       child: SvgPicture.asset(
                         AppAssets.minus,
-                        width: 28.r,
-                        height: 28.r,
+                        width: 20.r,
+                        height: 20.r,
                         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                       ),
                     ),
@@ -179,8 +183,8 @@ class MenuItemCard extends StatelessWidget {
                     onTap: onAdd, // ✅ Direct add without customization
                     child: SvgPicture.asset(
                       AppAssets.plus,
-                      width: 28.r,
-                      height: 28.r,
+                      width: 20.r,
+                      height: 20.r,
                     ),
                   ),
                 ],
