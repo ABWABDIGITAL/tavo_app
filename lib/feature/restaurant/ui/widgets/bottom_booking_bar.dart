@@ -49,10 +49,9 @@ class BottomBookingBar extends StatelessWidget {
         topRight: Radius.circular(16.r),
       ),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0,), 
+        filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.transparent,
             border: Border(top: BorderSide(color: context.borderColor)),
           ),
           child: SafeArea(
@@ -114,17 +113,18 @@ class _BookOnlyButton extends StatelessWidget {
           elevation: 0,
           shadowColor: Colors.transparent,
           backgroundColor: ColorsManager.secondary100,
-          disabledBackgroundColor: ColorsManager.secondary100.withValues(alpha: 0.35),
+          disabledBackgroundColor: ColorsManager.secondary100.withValues(
+            alpha: 0.35,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28.r),
           ),
         ),
         child: Text(
           buttonTextKey.tr(),
-          style: TextStyles.font16White500Weight(context).copyWith(
-            color: ColorsManager.black,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyles.font16White500Weight(
+            context,
+          ).copyWith(color: ColorsManager.black, fontWeight: FontWeight.w700),
         ),
       ),
     );
@@ -168,9 +168,9 @@ class _BookWithTotalOneContainer extends StatelessWidget {
             children: [
               Text(
                 buttonTextKey.tr(),
-                style: TextStyles.font16White500Weight(context).copyWith(
-                  color: ColorsManager.black,
-                ),
+                style: TextStyles.font16White500Weight(
+                  context,
+                ).copyWith(color: ColorsManager.black),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -244,7 +244,9 @@ class _MiniCartStrip extends StatelessWidget {
                   return _MiniCartItem(
                     line: line,
                     onAdd: onAddItem == null ? null : () => onAddItem!(line.id),
-                    onRemove: onRemoveItem == null ? null : () => onRemoveItem!(line.id),
+                    onRemove: onRemoveItem == null
+                        ? null
+                        : () => onRemoveItem!(line.id),
                   );
                 },
               ),
@@ -280,7 +282,8 @@ class _MiniCartItem extends StatelessWidget {
               width: 88.w,
               height: 96.h,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: ColorsManager.grey100),
+              errorBuilder: (_, __, ___) =>
+                  Container(color: ColorsManager.grey100),
             ),
           ),
           PositionedDirectional(
@@ -296,20 +299,14 @@ class _MiniCartItem extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _SvgCircleButton(
-                    asset: AppAssets.minus,
-                    onTap: onRemove,
-                  ),
+                  _SvgCircleButton(asset: AppAssets.minus, onTap: onRemove),
                   Text(
                     '${line.qty}',
-                    style: TextStyles.font12White400Weight(context).copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyles.font12White400Weight(
+                      context,
+                    ).copyWith(fontWeight: FontWeight.w700),
                   ),
-                  _SvgCircleButton(
-                    asset: AppAssets.plus,
-                    onTap: onAdd,
-                  ),
+                  _SvgCircleButton(asset: AppAssets.plus, onTap: onAdd),
                 ],
               ),
             ),
@@ -324,10 +321,7 @@ class _SvgCircleButton extends StatelessWidget {
   final String asset;
   final VoidCallback? onTap;
 
-  const _SvgCircleButton({
-    required this.asset,
-    required this.onTap,
-  });
+  const _SvgCircleButton({required this.asset, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -338,7 +332,10 @@ class _SvgCircleButton extends StatelessWidget {
           asset,
           width: 18.r,
           height: 18.r,
-          colorFilter: const ColorFilter.mode(ColorsManager.black, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(
+            ColorsManager.black,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );

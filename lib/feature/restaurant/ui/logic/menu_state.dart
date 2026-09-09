@@ -1,6 +1,5 @@
 import 'package:tavo/feature/restaurant/data/model/menu_category_model.dart';
 import 'package:tavo/feature/restaurant/data/model/menu_item_model.dart';
-import 'package:tavo/feature/restaurant/data/model/menu_response.dart';
 
 class MenuState {
   final bool loading;

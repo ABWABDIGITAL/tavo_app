@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:tavo/core/constants/app_assets.dart';
 import 'package:tavo/core/helpers/utils/spacing.dart';
 import 'package:tavo/core/theme/colors.dart';
 

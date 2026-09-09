@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tavo/core/di/service_locator.dart';
 import 'package:tavo/core/theme/colors.dart';
-import 'package:tavo/core/theme/theme_extensions.dart';
 
 import 'package:tavo/feature/home/ui/logic/cubit/home_cubit.dart';
 import 'package:tavo/feature/home/ui/logic/cubit/home_state.dart';

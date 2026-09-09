@@ -950,8 +950,6 @@ class _GuestSelector extends StatelessWidget {
   const _GuestSelector({
     required this.value,
     required this.onChanged,
-    this.min = 1,
-    this.max = 20,
   });
 
   @override

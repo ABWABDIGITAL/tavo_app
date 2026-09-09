@@ -1,7 +1,6 @@
 // lib/feature/Profile/ui/logic/cubit/profile_cubit.dart
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tavo/feature/Profile/data/model/user_model.dart';
 import 'package:tavo/feature/Profile/ui/logic/cubit/profile_state.dart';
 import 'package:tavo/feature/Profile/data/repo/profile_repo.dart';
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tavo/core/theme/colors.dart';
 
 class TableSeatIcon extends StatelessWidget {

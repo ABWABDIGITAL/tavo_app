@@ -106,7 +106,7 @@ class MenuItemCard extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
               decoration: BoxDecoration(
-                color: ColorsManager.black.withValues(alpha: 0.25),
+                color: ColorsManager.black.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(18.r),
                   bottomRight: Radius.circular(18.r),

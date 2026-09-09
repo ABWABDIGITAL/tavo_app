@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:tavo/core/network/api_constants.dart';
 import 'package:tavo/core/network/api_service.dart';
-import 'package:tavo/feature/restaurant/data/model/menu_item_model.dart';
 import 'package:tavo/feature/restaurant/data/model/menu_response.dart';
 
 class MenuRepo {

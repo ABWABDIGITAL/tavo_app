@@ -25,7 +25,6 @@ import 'package:tavo/feature/Profile/ui/screens/help_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/language_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/personal_info_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/privacy_policy_screen.dart';
-import 'package:tavo/feature/Profile/ui/screens/stats_screen.dart';
 import 'package:tavo/feature/Profile/ui/screens/terms_screen.dart';
 
 class ProfileScreen extends StatelessWidget {

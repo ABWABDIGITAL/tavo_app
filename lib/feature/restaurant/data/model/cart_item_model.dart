@@ -1,5 +1,4 @@
 // lib/feature/restaurant/data/model/cart_item_model.dart
-import 'package:tavo/feature/restaurant/data/model/menu_item_specification_model.dart';
 
 class CartItemModel {
   final String menuItemId;
